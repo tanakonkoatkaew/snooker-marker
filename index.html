@@ -26,8 +26,12 @@
   --brass: #8A6820;
   --warn: #A3311E;
   --warn-soft: #F6DED7;
+  --on-warn: #FFFFFF;
+  --amber: #8A5A00;
+  --amber-soft: #F6E7C4;
   --ball-ring: rgba(0, 0, 0, .28);
   --scrim: rgba(10, 18, 14, .52);
+  --dock-shadow: rgba(20, 33, 27, .14);
   --shadow: 0 1px 2px rgba(20, 33, 27, .07), 0 8px 22px rgba(20, 33, 27, .06);
 
   --b1: #C8102E; --b2: #F2C200; --b3: #12854A; --b4: #7A4A21;
@@ -42,16 +46,16 @@
   :root:not([data-theme="light"]) {
     --bg: #0D1612; --surface: #14201A; --surface-2: #1B2A22; --fg: #E6EEE8; --muted: #90A398;
     --line: #26372E; --baize: #3BA673; --baize-soft: #163324; --on-baize: #06140D; --brass: #D4B061;
-    --warn: #F08A72; --warn-soft: #3A1E17; --ball-ring: rgba(255, 255, 255, .38);
-    --scrim: rgba(0, 0, 0, .62); --shadow: 0 1px 0 rgba(255, 255, 255, .03);
+    --warn: #F08A72; --warn-soft: #3A1E17; --on-warn: #1A0B07; --amber: #E8B54A; --amber-soft: #3A2D10; --ball-ring: rgba(255, 255, 255, .38);
+    --scrim: rgba(0, 0, 0, .62); --dock-shadow: rgba(0, 0, 0, .55); --shadow: 0 1px 0 rgba(255, 255, 255, .03);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0D1612; --surface: #14201A; --surface-2: #1B2A22; --fg: #E6EEE8; --muted: #90A398;
   --line: #26372E; --baize: #3BA673; --baize-soft: #163324; --on-baize: #06140D; --brass: #D4B061;
-  --warn: #F08A72; --warn-soft: #3A1E17; --ball-ring: rgba(255, 255, 255, .38);
-  --scrim: rgba(0, 0, 0, .62); --shadow: 0 1px 0 rgba(255, 255, 255, .03);
+  --warn: #F08A72; --warn-soft: #3A1E17; --on-warn: #1A0B07; --amber: #E8B54A; --amber-soft: #3A2D10; --ball-ring: rgba(255, 255, 255, .38);
+  --scrim: rgba(0, 0, 0, .62); --dock-shadow: rgba(0, 0, 0, .55); --shadow: 0 1px 0 rgba(255, 255, 255, .03);
   color-scheme: dark;
 }
 
@@ -62,6 +66,7 @@ body { margin: 0; -webkit-text-size-adjust: 100%; }
 body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.5; }
 button { font: inherit; color: inherit; }
 .wrap { max-width: 1000px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 56px; display: grid; gap: 16px; }
+.wrap > * { min-width: 0; }
 .num { font-family: var(--display); font-variant-numeric: tabular-nums; }
 
 /* header */
@@ -119,6 +124,32 @@ button { font: inherit; color: inherit; }
 .reddots i.gone { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
 .on { display: inline-flex; align-items: center; gap: 8px; }
 .sw { width: 16px; height: 16px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px var(--ball-ring); }
+
+/* frame analysis */
+.ana { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 12px; }
+.ana-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.ana-head .lbl { font-size: 11px; color: var(--muted); letter-spacing: .04em; }
+.ana-head h2 { margin: 0; font-family: var(--display); font-size: 20px; font-weight: 700; line-height: 1.2; text-wrap: balance; }
+.verdict { flex: none; padding: 6px 16px; border-radius: 99px; font-family: var(--display); font-weight: 700; font-size: 16px; border: 1px solid transparent; }
+.v-go { background: var(--baize); color: var(--on-baize); }
+.v-hard { background: var(--amber-soft); color: var(--amber); border-color: var(--amber); }
+.v-consider { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+.v-concede, .v-lost { background: var(--warn); color: var(--on-warn); }
+.why { margin: 0; max-width: 72ch; }
+.ana-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.stat { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; display: grid; gap: 2px; align-content: start; min-width: 0; }
+.stat .lbl { font-size: 11px; color: var(--muted); letter-spacing: .04em; }
+.stat .val { font-family: var(--display); font-weight: 600; font-size: 22px; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.stat .val small { font-family: var(--body); font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+.ana-notes { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; color: var(--muted); max-width: 80ch; }
+.ana-notes b { color: var(--fg); font-weight: 600; }
+.rate { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.opt.sm { padding: 4px 10px; font-size: 13px; }
+
+.decide-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.decide-foot { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.decide-foot .btn { padding: 13px 10px; font-size: 16px; }
+.btn.solid-warn { background: var(--warn); border-color: var(--warn); color: var(--on-warn); font-weight: 600; }
 
 /* alerts */
 .alerts { display: grid; gap: 8px; }
@@ -215,6 +246,45 @@ td.w { font-weight: 600; color: var(--baize); }
   .fields2 { grid-template-columns: 1fr; }
   .brand h1 { font-size: 19px; }
 }
+/* phone: sticky scores on top, ball pad docked to the bottom, table info scrolls between */
+@media (max-width: 720px), (pointer: coarse) and (max-height: 560px) {
+  .wrap { padding-block: 10px calc(var(--dock-h, 240px) + 20px); gap: 12px; }
+  .top { order: 0; gap: 8px; }
+  .board { order: 1; } .alerts { order: 2; } .strip { order: 3; } .ana { order: 4; } .records { order: 5; } .rules { order: 6; }
+  .mark { width: 34px; height: 34px; font-size: 14px; border-radius: 8px; }
+  .brand h1 { font-size: 17px; }
+  .brand p { font-size: 12px; margin: 0; }
+  .top-actions { width: 100%; flex-wrap: nowrap; gap: 6px; min-width: 0; }
+  .top-actions > * { min-width: 0; }
+  .modeseg { flex: 1 1 auto; }
+  .mopt { flex: 1 1 0; padding: 6px 8px; }
+  .top-actions .btn { padding: 7px 10px; font-size: 14px; white-space: nowrap; }
+
+  .board { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+    margin-inline: -16px; padding: 6px 16px 8px; gap: 8px; }
+  .player { padding: 8px 10px; gap: 0; box-shadow: none; }
+  .p-name { font-size: 14px; }
+  .turn { font-size: 10px; padding: 2px 7px; }
+  .p-score { font-size: clamp(2.4rem, 12vw, 3.6rem); }
+  .p-meta { grid-template-columns: auto auto; gap: 0 14px; margin-top: 2px; }
+  .p-meta div:nth-child(3) { display: none; }
+  .p-meta dt { font-size: 10px; }
+  .p-meta dd { font-size: 15px; }
+
+  .pad { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; border-radius: 18px 18px 0 0; border-width: 1px 0 0;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)); gap: 10px; box-shadow: 0 -8px 24px var(--dock-shadow); }
+  .pad-head { min-height: 0; flex-wrap: nowrap; }
+  .pad-head .bk { white-space: nowrap; }
+  .pad-head .bk b { font-size: 18px; }
+  .chips { flex-wrap: nowrap; overflow: hidden; justify-content: flex-end; }
+  .chip { width: 14px; height: 14px; flex: none; font-size: 8px; }
+  .balls { flex-wrap: nowrap; justify-content: space-between; gap: 4px; }
+  .ball-wrap { flex: 1 1 0; min-width: 0; }
+  .ball { --size: min(12.4vw, 54px); }
+  .ball-wrap span, .keys, .long { display: none; }
+  .actions { gap: 6px; }
+  .actions .btn { flex: 1 1 auto; padding: 11px 8px; font-size: 14px; white-space: nowrap; }
+}
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -233,7 +303,7 @@ td.w { font-weight: 600; color: var(--baize); }
         <button class="mopt" id="m15" data-act="pickMode" data-arg="15"><b>15</b> แดง</button>
         <button class="mopt" id="m6" data-act="pickMode" data-arg="6"><b>6</b> แดง</button>
       </div>
-      <button class="btn" id="undoBtn" data-act="undo" title="ย้อนกลับ (Z)">↶ ย้อนกลับ</button>
+      <button class="btn" id="undoBtn" data-act="undo" title="ย้อนกลับ (Z)" aria-label="ย้อนกลับ">↶<span class="long"> ย้อนกลับ</span></button>
       <button class="btn" data-act="openSetup">แมตช์ใหม่</button>
     </div>
   </header>
@@ -266,6 +336,8 @@ td.w { font-weight: 600; color: var(--baize); }
     <div class="cell"><span class="lbl">ลูกเป้าหมาย</span><span class="val" id="ballOn"></span></div>
   </section>
 
+  <section class="ana" id="ana" aria-label="วิเคราะห์เฟรม" aria-live="polite"></section>
+
   <div class="alerts" id="alerts"></div>
 
   <section class="pad" aria-label="บันทึกการแทง">
@@ -276,10 +348,10 @@ td.w { font-weight: 600; color: var(--baize); }
     <div class="balls" id="balls"></div>
     <div class="actions">
       <button class="btn primary" id="fbBtn" data-act="freeBall" hidden>ฟรีบอลลง</button>
-      <button class="btn" id="sameRedBtn" data-act="sameRed" title="แดงลงมากกว่า 1 ลูกในช็อตเดียว">+1 แดง ช็อตเดียวกัน</button>
-      <button class="btn" id="endBtn" data-act="endTurn">จบเทิร์น (พลาด / เซฟตี้)</button>
+      <button class="btn" id="sameRedBtn" data-act="sameRed" title="แดงลงมากกว่า 1 ลูกในช็อตเดียว">+1 แดง<span class="long"> ช็อตเดียวกัน</span></button>
+      <button class="btn" id="endBtn" data-act="endTurn">จบเทิร์น<span class="long"> (พลาด / เซฟตี้)</span></button>
       <button class="btn danger" id="foulBtn" data-act="openFoul">ฟาวล์…</button>
-      <button class="btn" id="concedeBtn" data-act="openConcede">ยอมแพ้เฟรม</button>
+      <button class="btn" id="concedeBtn" data-act="openConcede">ยอมแพ้<span class="long">เฟรม</span></button>
     </div>
     <p class="keys">คีย์ลัด: <kbd>1</kbd>–<kbd>7</kbd> แทงลูกลง · <kbd>M</kbd> จบเทิร์น · <kbd>F</kbd> ฟาวล์ · <kbd>Z</kbd> ย้อนกลับ</p>
   </section>
@@ -305,7 +377,8 @@ td.w { font-weight: 600; color: var(--baize); }
       <li>หลังฟาวล์ ฝ่ายตรงข้ามเลือกแทงเองหรือให้ผู้ทำฟาวล์แทงอีกครั้ง ถ้ากรรมการขาน Foul and a Miss จะขอให้วางลูกคืนตำแหน่งเดิมได้</li>
       <li>ฟรีบอล: ถ้าผู้เล่นที่จะแทงต่อถูกสนุ๊กหลังฟาวล์ เลือกลูกใดก็ได้เป็นลูกเป้าหมาย ลูกนั้นมีค่าเท่าลูกเป้าหมายจริง (ถ้าอยู่ช่วงแดงจะนับเป็นแดง 1 แต้ม แล้วได้แทงสีต่อ) ถ้าขอให้ผู้ทำฟาวล์แทงอีกครั้ง ฟรีบอลจะถูกยกเลิก</li>
       <li>เมื่อเหลือลูกดำลูกเดียว แต้มหรือฟาวล์แรกจะจบเฟรม ถ้าสกอร์เสมอ ให้ตั้งลูกดำใหม่ (Re-spotted black) และเสี่ยงทายผู้แทงก่อน</li>
-      <li>แต้มที่เหลือบนโต๊ะนับแบบแดงทุกลูกตามด้วยดำ ถ้าฝ่ายที่ตามอยู่ตามมากกว่าแต้มที่เหลือ ต้องได้แต้มจากฟาวล์ของอีกฝ่าย (สนุ๊ก) โปรแกรมจะแจ้งจำนวนสนุ๊กที่ต้องการ</li>
+      <li>แต้มที่เหลือบนโต๊ะนับแบบแดงทุกลูกตามด้วยดำ ถ้าฝ่ายที่ตามอยู่ตามมากกว่าแต้มที่เหลือ ต้องได้แต้มจากฟาวล์ของอีกฝ่าย (สนุ๊ก)</li>
+      <li>แผงวิเคราะห์เฟรมบอกแต้มขาด จำนวนสนุ๊กที่ต้องการ (ฟาวล์ขั้นต่ำถึง 7 แต้ม) ประมาณการจำนวนครั้งที่ต้องวางสนุ๊ก และแนะนำว่าควรสู้ต่อหรือจบเฟรม เมื่อเริ่มมีแต้มขาดหรือต้องการสนุ๊กเพิ่มขึ้น จะมีหน้าต่างให้เลือกสู้ต่อหรือจบเฟรม</li>
       <li>6 แดง: กติกาเดียวกันทุกข้อ แต่ใช้แดง 6 ลูก เบรกสูงสุด 75 แต้ม (15 แดงสูงสุด 147)</li>
     </ul>
   </details>
@@ -333,7 +406,7 @@ td.w { font-weight: 600; color: var(--baize); }
   }
   function initFrame(s, breaker) {
     Object.assign(s, { scores: [0, 0], cur: breaker, breaker, reds: s.mode, phase: 'red', clearIdx: 2, brk: [],
-      freeBall: false, respot: false, respotChoose: false, frameOver: null, lastRed: false, fHigh: [0, 0],
+      freeBall: false, respot: false, respotChoose: false, frameOver: null, lastRed: false, fHigh: [0, 0], snkAck: null,
       msg: `${s.names[breaker]} เบรกเปิดเฟรมที่ ${s.frameNo}` });
   }
   const sum = (a) => a.reduce((t, b) => t + b.v, 0);
@@ -379,6 +452,113 @@ td.w { font-weight: 600; color: var(--baize); }
       s.respot = true; s.respotChoose = true; s.freeBall = false; s.lastRed = false;
       s.msg = 'สกอร์เสมอหลังลูกดำสุดท้าย ตั้งลูกดำใหม่';
     } else frameEnd(s, s.scores[0] > s.scores[1] ? 0 : 1, false);
+  }
+
+  /* ---------- frame analysis ---------- */
+  const PREF_KEY = 'snooker-marker-prefs';
+  const prefs = { rate: 50 };
+  try { Object.assign(prefs, JSON.parse(localStorage.getItem(PREF_KEY) || '{}')); } catch (e) {}
+
+  const ballsLeft = (s) => (s.phase === 'clear' ? 8 - s.clearIdx : s.reds + 6);
+  function remainingAt(ph, reds, ci) {
+    if (ph === 'red') return reds * 8 + 27;
+    if (ph === 'colour') return 7 + reds * 8 + 27;
+    let r = 0; for (let v = ci; v <= 7; v++) r += v; return r;
+  }
+  // points the leader still needs (red-black, then colours) until the lead exceeds what is left
+  function toSafety(s, diff) {
+    let ph = s.phase, reds = s.reds, ci = s.clearIdx, scored = 0;
+    for (let i = 0; i < 100; i++) {
+      if (diff + scored > remainingAt(ph, reds, ci)) return scored;
+      if (ph === 'red') { scored += 1; reds--; ph = 'colour'; }
+      else if (ph === 'colour') { scored += 7; if (reds > 0) ph = 'red'; else { ph = 'clear'; ci = 2; } }
+      else { if (ci > 7) return scored; scored += ci; ci++; }
+    }
+    return scored;
+  }
+  function analyse(s) {
+    const R = remaining(s);
+    const d = Math.abs(s.scores[0] - s.scores[1]);
+    if (d === 0) return { tie: true, R };
+    const L = s.scores[0] > s.scores[1] ? 0 : 1, T = 1 - L;
+    const a = { L, T, d, R, needWin: d + 1, short: Math.max(0, d + 1 - R), pen: minFoul(s), balls: ballsLeft(s) };
+    a.safety = d > R ? 0 : toSafety(s, d);
+    if (blackOnly(s)) {
+      a.blackOnly = true;
+      if (d >= 8) Object.assign(a, { tier: 'lost', verdict: 'จบเฟรม', why: `ตามอยู่ ${d} แต้ม แต่ลูกดำมีค่า 7 และแต้มหรือฟาวล์แรกจะจบเฟรมทันที ไม่มีทางกลับมาชนะแล้ว` });
+      else if (d === 7) Object.assign(a, { tier: 'hard', verdict: 'สู้ต่อ', why: 'ต้องแทงดำลงเพื่อเสมอ (หรือให้อีกฝ่ายฟาวล์ได้ 7 แต้ม) แล้วไปตั้งลูกดำใหม่' });
+      else Object.assign(a, { tier: 'go', verdict: 'สู้ต่อ', why: `ตามอยู่ ${d} แต้ม แทงดำลงชนะเฟรม หรือถ้าอีกฝ่ายฟาวล์ได้ 7 แต้มก็ชนะเช่นกัน` });
+      return a;
+    }
+    if (a.short === 0) {
+      const ratio = a.needWin / R, pct = Math.round(ratio * 100);
+      a.tier = ratio <= 0.5 ? 'go' : 'hard';
+      a.verdict = 'สู้ต่อ';
+      a.why = ratio <= 0.5 ? `ต้องได้ ${a.needWin} จาก ${R} แต้มที่เหลือ (${pct}%) ยังไม่ต้องพึ่งสนุ๊ก`
+        : ratio <= 0.8 ? `ต้องได้ ${a.needWin} จาก ${R} แต้มที่เหลือ (${pct}%) ต้องทำเบรกใหญ่ หรือหาแต้มจากฟาวล์มาช่วย`
+        : `ต้องได้ ${a.needWin} จาก ${R} แต้มที่เหลือ (${pct}%) แทบต้องเก็บหมดโต๊ะ ควรหาแต้มจากฟาวล์มาช่วย`;
+      return a;
+    }
+    a.nMax = Math.ceil(a.short / a.pen);
+    a.nMin = Math.ceil(a.short / 7);
+    a.nTie = Math.max(0, Math.ceil((d - R) / a.pen));
+    a.attempts = Math.ceil(a.nMax / (prefs.rate / 100));
+    const n = a.nMax, b = a.balls;
+    if (n === 1 && b >= 3) Object.assign(a, { tier: 'hard', verdict: 'สู้ต่อ', why: `ต้องการสนุ๊ก 1 ครั้ง ยังเหลือ ${b} ลูกบนโต๊ะให้วางสนุ๊กได้` });
+    else if (n === 1 || (n === 2 && b >= 5)) Object.assign(a, { tier: 'consider', verdict: 'พิจารณาจบเฟรม',
+      why: b < 3 ? `ต้องการสนุ๊ก ${n} ครั้ง แต่เหลือลูกบนโต๊ะแค่ ${b} ลูก โอกาสวางสนุ๊กมีน้อย` : `ต้องการสนุ๊ก ${n} ครั้ง ต้องได้ฟาวล์หลายครั้งและยังต้องเก็บแต้มที่เหลือเกือบทั้งหมด` });
+    else Object.assign(a, { tier: 'concede', verdict: 'ควรจบเฟรม', why: `ต้องการสนุ๊กถึง ${n} ครั้ง${b < 5 ? ` และเหลือลูกบนโต๊ะแค่ ${b} ลูก` : ''} โอกาสกลับมาชนะต่ำมาก` });
+    return a;
+  }
+
+  // pop up once when the trailing player first needs snookers, and again if they need more
+  function snookerPrompt(s) {
+    if (s.frameOver || s.respotChoose) return null;
+    const a = analyse(s);
+    if (a.tie || !a.short) return null;
+    const key = a.blackOnly ? 99 : a.nMax;
+    const ack = s.snkAck;
+    if (ack && ack.T === a.T && ack.n >= key) return null;
+    return a;
+  }
+
+  function renderAna(s) {
+    const el = $('ana');
+    if (s.frameOver) { el.hidden = true; return; }
+    el.hidden = false;
+    const a = analyse(s);
+    const nm = (i) => esc(s.names[i]);
+    const stat = (lbl, val) => `<div class="stat"><span class="lbl">${lbl}</span><span class="val">${val}</span></div>`;
+    if (a.tie) {
+      const x = toSafety(s, 0);
+      el.innerHTML = `<div class="ana-head"><div><span class="lbl">วิเคราะห์เฟรม</span><h2>สกอร์เสมอ ${s.scores[0]}–${s.scores[1]}</h2></div><span class="verdict v-go">สู้ต่อ</span></div>
+        <p class="why">${s.respot || blackOnly(s) ? 'ลูกดำลูกสุดท้าย ใครได้แต้มหรือได้ฟาวล์ก่อนชนะเฟรม' : `ยังไม่มีฝ่ายไหนต้องพึ่งสนุ๊ก ${nm(s.cur)} ต้องได้อีก ${x} แต้ม (แทงแดง-ดำ) จึงจะนำเกินแต้มบนโต๊ะ`}</p>`;
+      return;
+    }
+    let h = `<div class="ana-head"><div><span class="lbl">วิเคราะห์เฟรม · ฝ่ายที่ตามอยู่</span><h2>${nm(a.T)} ตามอยู่ ${a.d} แต้ม</h2></div><span class="verdict v-${a.tier}">${a.verdict}</span></div>`;
+    h += `<p class="why">${a.why}</p>`;
+    if (a.blackOnly) {
+      h += `<div class="ana-grid">${stat('ต้องได้เพื่อชนะ', `${a.needWin}<small>เหลือ 7</small>`)}${stat('แต้มขาด', `${a.short}<small>แต้ม</small>`)}${stat('สนุ๊ก', '<small style="margin:0">ไม่ช่วย ฟาวล์จะจบเฟรม</small>')}</div>`;
+      el.innerHTML = h;
+      return;
+    }
+    const snk = a.short ? `${a.nMin === a.nMax ? a.nMax : `${a.nMin}–${a.nMax}`}<small>ครั้ง</small>` : '0<small>ไม่ต้อง</small>';
+    h += `<div class="ana-grid">
+      ${stat('ต้องได้เพื่อชนะ', `${a.needWin}<small>จาก ${a.R}</small>`)}
+      ${stat('แต้มขาด', a.short ? `${a.short}<small>ต้องได้จากฟาวล์</small>` : '0<small>แต้มบนโต๊ะพอ</small>')}
+      ${stat('สนุ๊กที่ต้องการ', snk)}
+      ${stat('ประมาณการวางสนุ๊ก', a.short ? `~${a.attempts}<small>ครั้ง</small>` : '–')}
+    </div>`;
+    const notes = [];
+    if (a.short) {
+      notes.push(`ได้ฟาวล์ครั้งละ <b>${a.pen} แต้ม</b> ต้องได้ <b>${a.nMax} ครั้ง</b>${a.nMin < a.nMax ? ` ถ้าวางสนุ๊กให้อีกฝ่ายไปโดนลูกดำ (ฟาวล์ 7 แต้ม) ลดเหลือ <b>${a.nMin} ครั้ง</b>` : ''}`);
+      if (a.nTie < a.nMax) notes.push(a.nTie === 0 ? 'ถ้าเก็บหมดโต๊ะจะได้สกอร์เสมอ แล้วไปตั้งลูกดำใหม่' : `สนุ๊ก ${a.nTie} ครั้งพอให้เสมอได้ ถ้าเก็บหมดโต๊ะจะไปตั้งลูกดำใหม่`);
+      notes.push(`ประมาณการวางสนุ๊กคิดว่าวางแล้วได้ฟาวล์ <b>${prefs.rate}%</b> ของครั้ง <span class="rate">${[30, 50, 70].map((r) => `<button class="opt sm" data-act="setRate" data-arg="${r}" aria-pressed="${prefs.rate === r}">${r}%</button>`).join('')}</span>`);
+    }
+    notes.push(a.safety === 0 ? `${nm(a.L)} นำเกินแต้มบนโต๊ะแล้ว ${nm(a.T)} ต้องพึ่งแต้มจากฟาวล์` : `${nm(a.L)} ต้องได้อีก ${a.safety} แต้ม (แทงแดง-ดำ) จึงจะนำเกินแต้มบนโต๊ะ`);
+    notes.push('ประมาณการทางคณิตศาสตร์ ไม่รวมแต้มจากฟรีบอล การจบเฟรมเป็นการตัดสินใจของผู้เล่น');
+    h += `<ul class="ana-notes">${notes.map((n) => `<li>${n}</li>`).join('')}</ul>`;
+    el.innerHTML = h;
   }
 
   /* ---------- actions ---------- */
@@ -496,6 +676,22 @@ td.w { font-weight: 600; color: var(--baize); }
       state = makeMatch(cfg);
       ui.sheet = null; persist(); render();
     },
+    fightOn() {
+      const a = analyse(state);
+      if (a.tie) return;
+      state.snkAck = { T: a.T, n: a.blackOnly ? 99 : a.nMax };
+      persist(); render();
+    },
+    giveUp() {
+      const a = analyse(state);
+      if (a.tie || state.frameOver) return;
+      act((s) => { commitBreak(s); frameEnd(s, a.L, true); s.msg = `${s.names[a.T]} ยอมแพ้เฟรมที่ ${s.frameNo}`; });
+    },
+    setRate(r) {
+      prefs.rate = +r;
+      try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (e) {}
+      render();
+    },
     closeSheet() { ui.sheet = null; ui.foul = null; render(); },
     undo() {
       if (!hist.length) return;
@@ -510,6 +706,10 @@ td.w { font-weight: 600; color: var(--baize); }
     return `<div class="ball-wrap"><button class="ball${DARK_INK[v] ? ' dark-ink' : ''}" style="--c:var(--b${v})" data-act="pot" data-arg="${v}" id="ball${v}" aria-label="แทง${NAME[v]}ลง ${v} แต้ม">${v}</button><span>${NAME[v]}</span></div>`;
   }
   $('balls').innerHTML = [1, 2, 3, 4, 5, 6, 7].map(ballBtn).join('');
+  const dock = document.querySelector('.pad');
+  const setDock = () => document.documentElement.style.setProperty('--dock-h', dock.offsetHeight + 'px');
+  if ('ResizeObserver' in window) new ResizeObserver(setDock).observe(dock);
+  setDock();
 
   function ballOnHTML(s) {
     if (s.frameOver) return '<small>จบเฟรมแล้ว</small>';
@@ -557,11 +757,6 @@ td.w { font-weight: 600; color: var(--baize); }
       const v = s.phase === 'red' ? 1 : s.clearIdx;
       al.push(`<div class="note go"><b>ฟรีบอล</b> ${esc(s.names[s.cur])} เลือกลูกใดก็ได้เป็นลูกเป้าหมาย ถ้าลงจะนับเป็น${NAME[v]} ${v} แต้ม${s.phase === 'red' ? ' แล้วได้แทงสีต่อ' : ''}</div>`);
     }
-    if (!s.frameOver && lead >= 0 && d > rem) {
-      const trail = 1 - lead;
-      const n = Math.ceil((d - rem) / minFoul(s));
-      al.push(`<div class="note warn"><b>${esc(s.names[trail])} ต้องการสนุ๊ก ${n} ครั้ง</b> ตามอยู่ ${d} แต้ม แต่บนโต๊ะเหลือ ${rem} แต้ม</div>`);
-    }
     if (s.msg) al.push(`<div class="msg" role="status">${esc(s.msg)}</div>`);
     $('alerts').innerHTML = al.join('');
 
@@ -573,7 +768,7 @@ td.w { font-weight: 600; color: var(--baize); }
     for (let v = 1; v <= 7; v++) $('ball' + v).disabled = !canPot(s, v);
     const live = !s.frameOver && !s.respotChoose;
     $('fbBtn').hidden = !(s.freeBall && live);
-    if (s.freeBall) { const v = s.phase === 'red' ? 1 : s.clearIdx; $('fbBtn').textContent = `ฟรีบอลลง +${v}`; }
+    if (s.freeBall) { const v = s.phase === 'red' ? 1 : s.clearIdx; $('fbBtn').textContent = `ฟรีบอล +${v}`; }
     $('sameRedBtn').hidden = !(s.phase === 'colour' && s.lastRed && s.reds > 0 && live);
     $('endBtn').disabled = !live;
     $('foulBtn').disabled = !live;
@@ -592,17 +787,36 @@ td.w { font-weight: 600; color: var(--baize); }
       ? `<ul class="brklist">${big.map((b) => `<li><span>${esc(s.names[b.p])} <span class="msg">· เฟรม ${b.frame}</span></span><span><span class="num">${b.pts}</span>${b.pts >= maxBreak(s) ? '<span class="tag">MAX</span>' : b.pts >= 100 ? '<span class="tag">เซนจูรี</span>' : ''}</span></li>`).join('')}</ul>`
       : `<p class="empty">ยังไม่มีเบรก ${thr} แต้มขึ้นไป</p>`;
 
+    renderAna(s);
     renderSheet();
   }
 
   function renderSheet() {
     const s = state;
-    const kind = ui.sheet || (s.frameOver ? 'frame' : null);
+    const prompt = ui.sheet || s.frameOver ? null : snookerPrompt(s);
+    const kind = ui.sheet || (s.frameOver ? 'frame' : null) || (prompt ? 'snooker' : null);
     const sheet = $('sheet'), card = $('sheetCard');
     if (!kind) { sheet.hidden = true; card.innerHTML = ''; return; }
     sheet.hidden = false;
     let h = '';
-    if (kind === 'foul') {
+    if (kind === 'snooker') {
+      const a = prompt, nm = (i) => esc(s.names[i]);
+      const fight = a.tier === 'go' || a.tier === 'hard';
+      const stat = (lbl, val) => `<div class="stat"><span class="lbl">${lbl}</span><span class="val">${val}</span></div>`;
+      h += `<div class="ana-head"><h3>${nm(a.T)} แต้มขาด ${a.short} แต้ม</h3><span class="verdict v-${a.tier}">${a.verdict}</span></div>`;
+      h += `<p class="sub" style="margin:0">${a.why}</p>`;
+      h += `<div class="decide-stats">
+        ${stat('ตามอยู่', `${a.d}<small>แต้ม</small>`)}
+        ${stat('แต้มเหลือบนโต๊ะ', `${a.R}<small>แต้ม</small>`)}
+        ${a.blackOnly ? stat('สนุ๊ก', '<small style="margin:0">ไม่ช่วย ฟาวล์จบเฟรม</small>') : stat('สนุ๊กที่ต้องการ', `${a.nMin === a.nMax ? a.nMax : `${a.nMin}–${a.nMax}`}<small>ครั้ง</small>`)}
+        ${a.blackOnly ? stat('ทางชนะ', '<small style="margin:0">ไม่มีแล้ว</small>') : stat('ประมาณการวางสนุ๊ก', `~${a.attempts}<small>ครั้ง</small>`)}
+      </div>`;
+      h += `<p class="msg" style="margin:0">${nm(a.T)} จะสู้ต่อเพื่อหาแต้มจากฟาวล์ หรือจบเฟรมให้ ${nm(a.L)} ชนะ</p>`;
+      h += `<div class="decide-foot">
+        <button class="btn ${fight ? 'primary' : ''}" data-act="fightOn">สู้ต่อ</button>
+        <button class="btn ${fight ? 'danger' : 'solid-warn'}" data-act="giveUp">จบเฟรม</button>
+      </div>`;
+    } else if (kind === 'foul') {
       const f = ui.foul, off = s.cur, opp = 1 - off, mf = minFoul(s), bo = blackOnly(s);
       const opt = (act, arg, on, label, dis) => `<button class="opt" data-act="${act}" data-arg="${arg}" aria-pressed="${on}"${dis ? ' disabled' : ''}>${label}</button>`;
       h += `<h3>ฟาวล์โดย ${esc(s.names[off])}</h3><p class="sub">แต้มฟาวล์จะเข้า ${esc(s.names[opp])}${brkNote(s)}</p>`;
@@ -678,7 +892,7 @@ td.w { font-weight: 600; color: var(--baize); }
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     const k = e.key.toLowerCase();
     if (k === 'z') { A.undo(); return; }
-    if (ui.sheet || state.frameOver) return;
+    if (ui.sheet || state.frameOver || snookerPrompt(state)) return;
     if (k >= '1' && k <= '7') A.pot(k);
     else if (k === 'm') A.endTurn();
     else if (k === 'f') A.openFoul();
