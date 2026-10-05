@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Snooker Marker</title>
+<meta name="description" content="กระดานนับแต้มสนุกเกอร์ 15 แดงและ 6 แดง ตามกติกาสากล รองรับฟาวล์ ฟรีบอล Foul and a Miss และการตั้งลูกดำใหม่">
+<meta name="theme-color" content="#1C6A43">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<style>
+/* Layout: marker-board header → two player panels → table state strip → ball pad → match records */
+:root {
+  color-scheme: light;
+  --bg: #ECEFEA;
+  --surface: #F8FAF6;
+  --surface-2: #E1E8E0;
+  --fg: #15211B;
+  --muted: #58675F;
+  --line: #CCD6CE;
+  --baize: #1C6A43;
+  --baize-soft: #D6E8DB;
+  --on-baize: #F4FAF6;
+  --brass: #8A6820;
+  --warn: #A3311E;
+  --warn-soft: #F6DED7;
+  --ball-ring: rgba(0, 0, 0, .28);
+  --scrim: rgba(10, 18, 14, .52);
+  --shadow: 0 1px 2px rgba(20, 33, 27, .07), 0 8px 22px rgba(20, 33, 27, .06);
+
+  --b1: #C8102E; --b2: #F2C200; --b3: #12854A; --b4: #7A4A21;
+  --b5: #1F4FB8; --b6: #EE8AB2; --b7: #141617;
+  --ball-ink-light: #FFFFFF; --ball-ink-dark: #1A1A1A;
+
+  --display: "Chakra Petch", "IBM Plex Sans Thai", system-ui, sans-serif;
+  --body: "IBM Plex Sans Thai", system-ui, -apple-system, sans-serif;
+  --r: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1612; --surface: #14201A; --surface-2: #1B2A22; --fg: #E6EEE8; --muted: #90A398;
+    --line: #26372E; --baize: #3BA673; --baize-soft: #163324; --on-baize: #06140D; --brass: #D4B061;
+    --warn: #F08A72; --warn-soft: #3A1E17; --ball-ring: rgba(255, 255, 255, .38);
+    --scrim: rgba(0, 0, 0, .62); --shadow: 0 1px 0 rgba(255, 255, 255, .03);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1612; --surface: #14201A; --surface-2: #1B2A22; --fg: #E6EEE8; --muted: #90A398;
+  --line: #26372E; --baize: #3BA673; --baize-soft: #163324; --on-baize: #06140D; --brass: #D4B061;
+  --warn: #F08A72; --warn-soft: #3A1E17; --ball-ring: rgba(255, 255, 255, .38);
+  --scrim: rgba(0, 0, 0, .62); --shadow: 0 1px 0 rgba(255, 255, 255, .03);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; -webkit-text-size-adjust: 100%; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+button { font: inherit; color: inherit; }
+.wrap { max-width: 1000px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 56px; display: grid; gap: 16px; }
+.num { font-family: var(--display); font-variant-numeric: tabular-nums; }
+
+/* header */
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.mark { flex: none; width: 44px; height: 44px; border-radius: 10px; background: var(--baize); color: var(--on-baize);
+  display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 17px; letter-spacing: -.02em; }
+.brand h1 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 22px; line-height: 1.1; letter-spacing: .01em; }
+.brand p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.top-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.modeseg { display: inline-flex; padding: 3px; gap: 3px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; }
+.mopt { border: 0; background: transparent; border-radius: 9px; padding: 7px 14px; cursor: pointer; font-weight: 600; line-height: 1.2; color: var(--muted); }
+.mopt b { font-family: var(--display); font-size: 16px; margin-right: 2px; }
+.mopt[aria-pressed="true"] { background: var(--baize); color: var(--on-baize); }
+.mopt:hover:not([aria-pressed="true"]) { color: var(--fg); }
+
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 9px 14px; cursor: pointer;
+  font-weight: 500; line-height: 1.2; transition: background .15s, border-color .15s; }
+.btn:hover:not(:disabled) { border-color: var(--baize); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn.primary { background: var(--baize); border-color: var(--baize); color: var(--on-baize); font-weight: 600; }
+.btn.danger { color: var(--warn); }
+.btn.danger:hover:not(:disabled) { border-color: var(--warn); }
+:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+
+/* players */
+.board { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.player { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+  padding: 14px 16px 14px; display: grid; gap: 4px; min-width: 0; box-shadow: var(--shadow); transition: background .2s, border-color .2s; }
+.player.active { background: var(--baize-soft); border-color: var(--baize); }
+.p-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.p-name { font-weight: 600; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.turn { flex: none; font-size: 11px; font-weight: 600; letter-spacing: .06em; padding: 3px 8px; border-radius: 99px;
+  background: var(--baize); color: var(--on-baize); visibility: hidden; }
+.player.active .turn { visibility: visible; }
+.p-score { font-family: var(--display); font-weight: 700; font-variant-numeric: tabular-nums; line-height: .95;
+  font-size: clamp(3.4rem, 15vw, 6.6rem); letter-spacing: -.02em; }
+.p-meta { margin: 6px 0 0; display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 4px 18px; }
+.p-meta div { min-width: 0; }
+.p-meta dt { font-size: 11px; color: var(--muted); letter-spacing: .04em; }
+.p-meta dd { margin: 0; font-family: var(--display); font-weight: 600; font-size: 18px; font-variant-numeric: tabular-nums; }
+.p-frames { color: var(--brass); }
+
+/* table strip */
+.strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r); overflow: hidden; }
+.cell { padding: 12px 14px; display: grid; gap: 2px; align-content: start; min-width: 0; }
+.cell + .cell { border-left: 1px solid var(--line); }
+.cell .lbl { font-size: 11px; color: var(--muted); letter-spacing: .04em; }
+.cell .val { font-family: var(--display); font-weight: 600; font-size: 22px; font-variant-numeric: tabular-nums; line-height: 1.15;
+  overflow-wrap: anywhere; }
+.cell .val small { font-family: var(--body); font-size: 13px; font-weight: 500; color: var(--muted); }
+.reddots { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+.reddots i { width: 9px; height: 9px; border-radius: 50%; background: var(--b1); }
+.reddots i.gone { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+.on { display: inline-flex; align-items: center; gap: 8px; }
+.sw { width: 16px; height: 16px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px var(--ball-ring); }
+
+/* alerts */
+.alerts { display: grid; gap: 8px; }
+.alerts:empty { display: none; }
+.note { border-radius: 10px; padding: 10px 14px; font-size: 14px; border: 1px solid var(--line); background: var(--surface); }
+.note b { font-weight: 600; }
+.note.warn { background: var(--warn-soft); border-color: transparent; color: var(--fg); }
+.note.warn b { color: var(--warn); }
+.note.go { background: var(--baize-soft); border-color: var(--baize); }
+.note .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.msg { color: var(--muted); font-size: 13px; }
+
+/* pad */
+.pad { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 16px; box-shadow: var(--shadow); }
+.pad-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 28px; }
+.pad-head .bk { font-size: 14px; color: var(--muted); }
+.pad-head .bk b { font-family: var(--display); font-size: 22px; color: var(--fg); font-variant-numeric: tabular-nums; margin-left: 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
+.chip { width: 18px; height: 18px; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px var(--ball-ring);
+  font-size: 9px; font-weight: 700; display: grid; place-items: center; color: var(--ball-ink-light); font-family: var(--display); }
+.balls { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(6px, 2vw, 16px); }
+.ball { --size: clamp(42px, 11.2vw, 70px); width: var(--size); height: var(--size); border-radius: 50%; cursor: pointer;
+  border: 1px solid var(--ball-ring); color: var(--ball-ink-light); font-family: var(--display); font-weight: 700;
+  font-size: calc(var(--size) * .36); display: grid; place-items: center;
+  background: radial-gradient(circle at 34% 28%, rgba(255,255,255,.6) 0 7%, rgba(255,255,255,0) 32%), var(--c);
+  box-shadow: inset 0 -6px 10px rgba(0,0,0,.28), 0 2px 0 rgba(0,0,0,.18); transition: transform .08s, opacity .15s, filter .15s; }
+.ball:active:not(:disabled) { transform: scale(.94); }
+.ball:disabled { opacity: .18; filter: grayscale(.6); cursor: not-allowed; box-shadow: none; }
+.ball.dark-ink, .chip.dark-ink { color: var(--ball-ink-dark); }
+.ball-wrap { display: grid; justify-items: center; gap: 4px; }
+.ball-wrap span { font-size: 11px; color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.actions .btn { padding: 11px 16px; }
+.keys { margin: 0; text-align: center; font-size: 12px; color: var(--muted); }
+kbd { font-family: var(--display); font-size: 11px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; }
+
+/* records */
+.records { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; min-width: 0; }
+.card h2 { margin: 0 0 10px; font-family: var(--display); font-size: 15px; font-weight: 600; letter-spacing: .02em; }
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-weight: 500; font-size: 12px; color: var(--muted); padding: 4px 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 7px 8px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.w { font-weight: 600; color: var(--baize); }
+.empty { color: var(--muted); font-size: 14px; margin: 0; }
+.brklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.brklist li { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
+.brklist .num { font-weight: 600; font-size: 16px; }
+.tag { font-size: 11px; color: var(--brass); font-weight: 600; margin-left: 6px; }
+
+.rules { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 16px; }
+.rules summary { cursor: pointer; font-family: var(--display); font-weight: 600; font-size: 15px; }
+.rules ul { margin: 10px 0 4px; padding-left: 20px; display: grid; gap: 6px; max-width: 72ch; }
+
+/* sheet */
+.sheet { position: fixed; inset: 0; background: var(--scrim); display: grid; place-items: center; padding: 16px; z-index: 10; overflow-y: auto; }
+.sheet-card { width: min(520px, 100%); background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px;
+  display: grid; gap: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }
+.sheet-card h3 { margin: 0; font-family: var(--display); font-size: 20px; font-weight: 700; text-wrap: balance; }
+.sheet-card .sub { margin: -10px 0 0; color: var(--muted); font-size: 14px; }
+.grp { display: grid; gap: 8px; }
+.grp > .lbl { font-size: 12px; color: var(--muted); letter-spacing: .03em; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.opt { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 9px 14px; cursor: pointer; text-align: left; line-height: 1.35; }
+.opt[aria-pressed="true"] { background: var(--baize); color: var(--on-baize); border-color: var(--baize); }
+.opt:disabled { opacity: .35; cursor: not-allowed; }
+.opt.num-opt { min-width: 52px; text-align: center; font-family: var(--display); font-weight: 700; font-size: 18px; }
+.opt.full { width: 100%; }
+.opt small { display: block; font-size: 12px; opacity: .8; }
+.stepper { display: inline-flex; align-items: center; gap: 10px; }
+.stepper b { font-family: var(--display); font-size: 20px; min-width: 2ch; text-align: center; }
+.check { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 14px; }
+.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--baize); }
+.sheet-foot { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: 12px; color: var(--muted); }
+.field input, .field select { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; width: 100%; }
+.fields2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.big-result { font-family: var(--display); font-size: 40px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+.big-result small { display: block; font-family: var(--body); font-size: 14px; font-weight: 500; color: var(--muted); }
+
+@media (max-width: 720px) {
+  .strip { grid-template-columns: 1fr 1fr; }
+  .cell:nth-child(3) { border-left: 0; }
+  .cell:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .records { grid-template-columns: 1fr; }
+}
+@media (max-width: 440px) {
+  .player { padding: 12px; }
+  .p-meta { grid-template-columns: repeat(2, auto); gap: 2px 12px; }
+  .p-meta div:nth-child(3) { grid-column: 1 / -1; }
+  .fields2 { grid-template-columns: 1fr; }
+  .brand h1 { font-size: 19px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="mark num" id="modeMark">15</div>
+      <div>
+        <h1>Snooker Marker</h1>
+        <p id="sub"></p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="modeseg" role="group" aria-label="รูปแบบการเล่น">
+        <button class="mopt" id="m15" data-act="pickMode" data-arg="15"><b>15</b> แดง</button>
+        <button class="mopt" id="m6" data-act="pickMode" data-arg="6"><b>6</b> แดง</button>
+      </div>
+      <button class="btn" id="undoBtn" data-act="undo" title="ย้อนกลับ (Z)">↶ ย้อนกลับ</button>
+      <button class="btn" data-act="openSetup">แมตช์ใหม่</button>
+    </div>
+  </header>
+
+  <section class="board" aria-label="สกอร์ผู้เล่น">
+    <article class="player" id="p0">
+      <div class="p-head"><span class="p-name"></span><span class="turn">กำลังแทง</span></div>
+      <div class="p-score" aria-live="polite"></div>
+      <dl class="p-meta">
+        <div><dt>เฟรมที่ชนะ</dt><dd class="p-frames"></dd></div>
+        <div><dt>เบรกตอนนี้</dt><dd class="p-break"></dd></div>
+        <div><dt>เบรกสูงสุดในแมตช์</dt><dd class="p-high"></dd></div>
+      </dl>
+    </article>
+    <article class="player" id="p1">
+      <div class="p-head"><span class="p-name"></span><span class="turn">กำลังแทง</span></div>
+      <div class="p-score" aria-live="polite"></div>
+      <dl class="p-meta">
+        <div><dt>เฟรมที่ชนะ</dt><dd class="p-frames"></dd></div>
+        <div><dt>เบรกตอนนี้</dt><dd class="p-break"></dd></div>
+        <div><dt>เบรกสูงสุดในแมตช์</dt><dd class="p-high"></dd></div>
+      </dl>
+    </article>
+  </section>
+
+  <section class="strip" aria-label="สถานะบนโต๊ะ">
+    <div class="cell"><span class="lbl">แต้มที่เหลือบนโต๊ะ</span><span class="val" id="remain"></span></div>
+    <div class="cell"><span class="lbl">ผลต่าง</span><span class="val" id="diff"></span></div>
+    <div class="cell"><span class="lbl">แดงบนโต๊ะ</span><span class="val" id="redsLeft"></span><div class="reddots" id="redDots"></div></div>
+    <div class="cell"><span class="lbl">ลูกเป้าหมาย</span><span class="val" id="ballOn"></span></div>
+  </section>
+
+  <div class="alerts" id="alerts"></div>
+
+  <section class="pad" aria-label="บันทึกการแทง">
+    <div class="pad-head">
+      <span class="bk">เบรกปัจจุบัน<b id="brkSum">0</b></span>
+      <div class="chips" id="brkChips"></div>
+    </div>
+    <div class="balls" id="balls"></div>
+    <div class="actions">
+      <button class="btn primary" id="fbBtn" data-act="freeBall" hidden>ฟรีบอลลง</button>
+      <button class="btn" id="sameRedBtn" data-act="sameRed" title="แดงลงมากกว่า 1 ลูกในช็อตเดียว">+1 แดง ช็อตเดียวกัน</button>
+      <button class="btn" id="endBtn" data-act="endTurn">จบเทิร์น (พลาด / เซฟตี้)</button>
+      <button class="btn danger" id="foulBtn" data-act="openFoul">ฟาวล์…</button>
+      <button class="btn" id="concedeBtn" data-act="openConcede">ยอมแพ้เฟรม</button>
+    </div>
+    <p class="keys">คีย์ลัด: <kbd>1</kbd>–<kbd>7</kbd> แทงลูกลง · <kbd>M</kbd> จบเทิร์น · <kbd>F</kbd> ฟาวล์ · <kbd>Z</kbd> ย้อนกลับ</p>
+  </section>
+
+  <section class="records">
+    <div class="card">
+      <h2>ผลแต่ละเฟรม</h2>
+      <div class="tbl-wrap" id="framesTbl"></div>
+    </div>
+    <div class="card">
+      <h2 id="brkTitle">เบรกสำคัญ</h2>
+      <div id="brkList"></div>
+    </div>
+  </section>
+
+  <details class="rules">
+    <summary>สรุปกติกาที่โปรแกรมใช้ (กติกาสากล WPBSA)</summary>
+    <ul>
+      <li>ค่าลูก: แดง 1 · เหลือง 2 · เขียว 3 · น้ำตาล 4 · น้ำเงิน 5 · ชมพู 6 · ดำ 7</li>
+      <li>ขณะยังมีแดงบนโต๊ะ ต้องแทงแดงก่อน แล้วตามด้วยลูกสีใดก็ได้ 1 ลูก ลูกสีที่ลงจะถูกตั้งคืน สลับแดงกับสีไปเรื่อย ๆ</li>
+      <li>เมื่อแดงหมด เก็บลูกสีตามลำดับ เหลือง → เขียว → น้ำตาล → น้ำเงิน → ชมพู → ดำ</li>
+      <li>ฟาวล์ให้แต้มฝ่ายตรงข้ามขั้นต่ำ 4 แต้ม หรือเท่ากับค่าลูกที่เกี่ยวข้องถ้าสูงกว่า สูงสุด 7 แต้ม แดงที่ลงหลุมจากฟาวล์จะไม่ถูกตั้งคืน</li>
+      <li>หลังฟาวล์ ฝ่ายตรงข้ามเลือกแทงเองหรือให้ผู้ทำฟาวล์แทงอีกครั้ง ถ้ากรรมการขาน Foul and a Miss จะขอให้วางลูกคืนตำแหน่งเดิมได้</li>
+      <li>ฟรีบอล: ถ้าผู้เล่นที่จะแทงต่อถูกสนุ๊กหลังฟาวล์ เลือกลูกใดก็ได้เป็นลูกเป้าหมาย ลูกนั้นมีค่าเท่าลูกเป้าหมายจริง (ถ้าอยู่ช่วงแดงจะนับเป็นแดง 1 แต้ม แล้วได้แทงสีต่อ) ถ้าขอให้ผู้ทำฟาวล์แทงอีกครั้ง ฟรีบอลจะถูกยกเลิก</li>
+      <li>เมื่อเหลือลูกดำลูกเดียว แต้มหรือฟาวล์แรกจะจบเฟรม ถ้าสกอร์เสมอ ให้ตั้งลูกดำใหม่ (Re-spotted black) และเสี่ยงทายผู้แทงก่อน</li>
+      <li>แต้มที่เหลือบนโต๊ะนับแบบแดงทุกลูกตามด้วยดำ ถ้าฝ่ายที่ตามอยู่ตามมากกว่าแต้มที่เหลือ ต้องได้แต้มจากฟาวล์ของอีกฝ่าย (สนุ๊ก) โปรแกรมจะแจ้งจำนวนสนุ๊กที่ต้องการ</li>
+      <li>6 แดง: กติกาเดียวกันทุกข้อ แต่ใช้แดง 6 ลูก เบรกสูงสุด 75 แต้ม (15 แดงสูงสุด 147)</li>
+    </ul>
+  </details>
+</div>
+
+<div class="sheet" id="sheet" hidden><div class="sheet-card" id="sheetCard" role="dialog" aria-modal="true"></div></div>
+
+<script>
+(() => {
+  const KEY = 'snooker-marker-v1';
+  const NAME = ['', 'แดง', 'เหลือง', 'เขียว', 'น้ำตาล', 'น้ำเงิน', 'ชมพู', 'ดำ'];
+  const DARK_INK = { 2: true, 6: true };
+  const $ = (id) => document.getElementById(id);
+  const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  let state, hist = [];
+  const ui = { sheet: null, foul: null };
+
+  /* ---------- model ---------- */
+  function makeMatch(c) {
+    const s = { mode: c.mode, names: c.names.slice(), bestOf: c.bestOf, first: c.first,
+      frames: [0, 0], frameNo: 1, records: [], breaks: [], high: [0, 0], matchOver: false };
+    initFrame(s, c.first);
+    return s;
+  }
+  function initFrame(s, breaker) {
+    Object.assign(s, { scores: [0, 0], cur: breaker, breaker, reds: s.mode, phase: 'red', clearIdx: 2, brk: [],
+      freeBall: false, respot: false, respotChoose: false, frameOver: null, lastRed: false, fHigh: [0, 0],
+      msg: `${s.names[breaker]} เบรกเปิดเฟรมที่ ${s.frameNo}` });
+  }
+  const sum = (a) => a.reduce((t, b) => t + b.v, 0);
+  const target = (s) => Math.floor(s.bestOf / 2) + 1;
+  const maxBreak = (s) => s.mode * 8 + 27;
+  const blackOnly = (s) => s.phase === 'clear' && s.clearIdx === 7;
+
+  function remaining(s) {
+    let r = 0;
+    if (s.phase === 'red') r = s.reds * 8 + 27;
+    else if (s.phase === 'colour') r = 7 + s.reds * 8 + 27;
+    else for (let v = s.clearIdx; v <= 7; v++) r += v;
+    if (s.freeBall) r += s.phase === 'red' ? 8 : s.clearIdx;
+    return r;
+  }
+  const minFoul = (s) => (s.phase === 'clear' ? Math.max(4, s.clearIdx) : 4);
+  function canPot(s, v) {
+    if (s.frameOver || s.respotChoose) return false;
+    if (s.phase === 'red') return v === 1 && s.reds > 0;
+    if (s.phase === 'colour') return v >= 2;
+    return v === s.clearIdx;
+  }
+  function commitBreak(s) {
+    const p = sum(s.brk);
+    if (p > 0) {
+      s.breaks.push({ p: s.cur, pts: p, frame: s.frameNo });
+      if (p > s.high[s.cur]) s.high[s.cur] = p;
+      if (p > s.fHigh[s.cur]) s.fHigh[s.cur] = p;
+    }
+    s.brk = [];
+    return p;
+  }
+  function frameEnd(s, w, conceded) {
+    s.frames[w]++;
+    s.records.push({ frame: s.frameNo, scores: s.scores.slice(), winner: w, high: s.fHigh.slice(), conceded: !!conceded });
+    s.frameOver = { winner: w, conceded: !!conceded };
+    s.freeBall = false; s.lastRed = false;
+    if (s.frames[w] >= target(s)) s.matchOver = true;
+    s.msg = `${s.names[w]} ชนะเฟรมที่ ${s.frameNo}`;
+  }
+  function blackFinished(s) {
+    if (s.scores[0] === s.scores[1]) {
+      s.respot = true; s.respotChoose = true; s.freeBall = false; s.lastRed = false;
+      s.msg = 'สกอร์เสมอหลังลูกดำสุดท้าย ตั้งลูกดำใหม่';
+    } else frameEnd(s, s.scores[0] > s.scores[1] ? 0 : 1, false);
+  }
+
+  /* ---------- actions ---------- */
+  function persist() { try { localStorage.setItem(KEY, JSON.stringify({ state, hist: hist.slice(-150) })); } catch (e) {} }
+  function act(fn) {
+    hist.push(JSON.stringify(state));
+    if (hist.length > 400) hist.shift();
+    fn(state);
+    persist(); render();
+  }
+
+  const A = {
+    pot(arg) {
+      const v = +arg;
+      if (!canPot(state, v)) return;
+      act((s) => {
+        const who = s.names[s.cur];
+        s.scores[s.cur] += v; s.brk.push({ v }); s.freeBall = false;
+        s.msg = `${who} แทง${NAME[v]}ลง +${v}`;
+        if (v === 1) { s.reds--; s.phase = 'colour'; s.lastRed = true; return; }
+        s.lastRed = false;
+        if (s.phase === 'colour') {
+          if (s.reds > 0) s.phase = 'red'; else { s.phase = 'clear'; s.clearIdx = 2; }
+        } else if (v === 7) {
+          commitBreak(s); blackFinished(s);
+        } else s.clearIdx++;
+      });
+    },
+    freeBall() {
+      if (!state.freeBall || state.frameOver) return;
+      act((s) => {
+        const v = s.phase === 'red' ? 1 : s.clearIdx;
+        s.scores[s.cur] += v; s.brk.push({ v, fb: true }); s.freeBall = false;
+        s.msg = `${s.names[s.cur]} แทงฟรีบอลลง นับเป็น${NAME[v]} +${v}`;
+        if (s.phase === 'red') { s.phase = 'colour'; s.lastRed = true; } else s.lastRed = false;
+      });
+    },
+    sameRed() {
+      const s0 = state;
+      if (!(s0.phase === 'colour' && s0.lastRed && s0.reds > 0)) return;
+      act((s) => { s.scores[s.cur] += 1; s.reds--; s.brk.push({ v: 1 }); s.msg = `${s.names[s.cur]} แดงลงเพิ่มในช็อตเดียวกัน +1`; });
+    },
+    endTurn() {
+      if (state.frameOver || state.respotChoose) return;
+      act((s) => {
+        const p = commitBreak(s);
+        if (s.phase === 'colour') { if (s.reds > 0) s.phase = 'red'; else { s.phase = 'clear'; s.clearIdx = 2; } }
+        s.msg = `${s.names[s.cur]} จบเทิร์น${p ? ` เบรก ${p}` : ''}`;
+        s.cur = 1 - s.cur; s.freeBall = false; s.lastRed = false;
+      });
+    },
+    openFoul() {
+      if (state.frameOver || state.respotChoose) return;
+      ui.foul = { val: minFoul(state), reds: 0, next: 'opp', fb: false };
+      ui.sheet = 'foul'; render();
+    },
+    foulVal(v) { ui.foul.val = +v; render(); },
+    foulReds(d) { const max = state.phase === 'clear' ? 0 : state.reds; ui.foul.reds = Math.min(max, Math.max(0, ui.foul.reds + +d)); render(); },
+    foulNext(x) { ui.foul.next = x; if (x !== 'opp') ui.foul.fb = false; if (x === 'replace') ui.foul.reds = 0; render(); },
+    foulFb() { ui.foul.fb = !ui.foul.fb; render(); },
+    foulOk() {
+      const f = ui.foul; ui.sheet = null; ui.foul = null;
+      act((s) => {
+        const off = s.cur, opp = 1 - off;
+        commitBreak(s);
+        s.scores[opp] += f.val; s.lastRed = false; s.freeBall = false;
+        s.msg = `ฟาวล์โดย ${s.names[off]} · ${s.names[opp]} ได้ ${f.val} แต้ม`;
+        if (blackOnly(s)) { blackFinished(s); return; }
+        if (f.next === 'replace') { s.cur = off; s.msg += ' · วางลูกคืน แทงใหม่'; return; }
+        if (s.phase !== 'clear') {
+          s.reds = Math.max(0, s.reds - f.reds);
+          if (s.reds > 0) s.phase = 'red'; else { s.phase = 'clear'; s.clearIdx = 2; }
+        }
+        s.cur = f.next === 'opp' ? opp : off;
+        s.freeBall = f.next === 'opp' && f.fb && !blackOnly(s);
+        if (f.next === 'again') s.msg += ` · ให้ ${s.names[off]} แทงอีกครั้ง`;
+        if (s.freeBall) s.msg += ' · ฟรีบอล';
+      });
+    },
+    openConcede() { if (state.frameOver) return; ui.sheet = 'concede'; render(); },
+    concede(p) {
+      ui.sheet = null;
+      act((s) => { commitBreak(s); frameEnd(s, 1 - +p, true); s.msg = `${s.names[+p]} ยอมแพ้เฟรมที่ ${s.frameNo}`; });
+    },
+    respotFirst(p) { act((s) => { s.cur = +p; s.respotChoose = false; s.msg = `ลูกดำตั้งใหม่ ${s.names[+p]} แทงก่อน`; }); },
+    nextFrame() { act((s) => { s.frameNo++; initFrame(s, 1 - s.breaker); }); },
+    rematch() {
+      hist.push(JSON.stringify(state));
+      state = makeMatch({ mode: state.mode, names: state.names, bestOf: state.bestOf, first: state.first });
+      ui.sheet = null; persist(); render();
+    },
+    pickMode(m) {
+      m = +m;
+      if (m === state.mode) return;
+      const s = state;
+      const fresh = s.frameNo === 1 && !s.records.length && !s.scores[0] && !s.scores[1] && s.reds === s.mode && !s.brk.length;
+      if (fresh) A.switchModeOk(m);
+      else { ui.pendingMode = m; ui.sheet = 'mode'; render(); }
+    },
+    switchModeOk(m) {
+      m = +(m ?? ui.pendingMode);
+      hist.push(JSON.stringify(state));
+      state = makeMatch({ mode: m, names: state.names, bestOf: state.bestOf, first: state.first });
+      state.msg = `เปลี่ยนเป็นโหมด ${m} แดง · ${state.names[state.first]} เบรกเปิดเฟรมที่ 1`;
+      ui.sheet = null; ui.setupMode = m; persist(); render();
+    },
+    openSetup() { ui.sheet = 'setup'; render(); setTimeout(() => $('fName0')?.focus(), 0); },
+    setMode(m) { ui.setupMode = +m; document.querySelectorAll('[data-act="setMode"]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.arg === +m))); },
+    setFirst(p) { ui.setupFirst = +p; document.querySelectorAll('[data-act="setFirst"]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.arg === +p))); },
+    setupOk() {
+      const n0 = $('fName0').value.trim() || 'ผู้เล่น 1';
+      const n1 = $('fName1').value.trim() || 'ผู้เล่น 2';
+      const cfg = { mode: ui.setupMode, names: [n0, n1], bestOf: +$('fBest').value, first: ui.setupFirst };
+      hist.push(JSON.stringify(state));
+      state = makeMatch(cfg);
+      ui.sheet = null; persist(); render();
+    },
+    closeSheet() { ui.sheet = null; ui.foul = null; render(); },
+    undo() {
+      if (!hist.length) return;
+      state = JSON.parse(hist.pop());
+      ui.sheet = null; ui.foul = null;
+      persist(); render();
+    },
+  };
+
+  /* ---------- view ---------- */
+  function ballBtn(v) {
+    return `<div class="ball-wrap"><button class="ball${DARK_INK[v] ? ' dark-ink' : ''}" style="--c:var(--b${v})" data-act="pot" data-arg="${v}" id="ball${v}" aria-label="แทง${NAME[v]}ลง ${v} แต้ม">${v}</button><span>${NAME[v]}</span></div>`;
+  }
+  $('balls').innerHTML = [1, 2, 3, 4, 5, 6, 7].map(ballBtn).join('');
+
+  function ballOnHTML(s) {
+    if (s.frameOver) return '<small>จบเฟรมแล้ว</small>';
+    if (s.phase === 'red') return `<span class="on"><i class="sw" style="background:var(--b1)"></i>แดง</span>`;
+    if (s.phase === 'colour') return `<span class="on"><small>สีใดก็ได้</small></span>`;
+    return `<span class="on"><i class="sw" style="background:var(--b${s.clearIdx})"></i>${NAME[s.clearIdx]}</span>`;
+  }
+
+  function render() {
+    const s = state;
+    $('modeMark').textContent = s.mode;
+    $('sub').textContent = `${s.mode} แดง · เฟรมที่ ${s.frameNo} · Best of ${s.bestOf} (ชนะ ${target(s)} เฟรม)`;
+    $('undoBtn').disabled = !hist.length;
+    $('m15').setAttribute('aria-pressed', String(s.mode === 15));
+    $('m6').setAttribute('aria-pressed', String(s.mode === 6));
+
+    const brkPts = sum(s.brk);
+    [0, 1].forEach((i) => {
+      const el = $('p' + i);
+      el.classList.toggle('active', s.cur === i && !s.frameOver && !s.respotChoose);
+      el.querySelector('.p-name').textContent = s.names[i];
+      el.querySelector('.p-score').textContent = s.scores[i];
+      el.querySelector('.p-frames').textContent = s.frames[i];
+      el.querySelector('.p-break').textContent = s.cur === i && brkPts ? brkPts : '–';
+      el.querySelector('.p-high').textContent = Math.max(s.high[i], s.cur === i ? brkPts : 0) || '–';
+    });
+
+    const rem = remaining(s);
+    const d = Math.abs(s.scores[0] - s.scores[1]);
+    const lead = s.scores[0] > s.scores[1] ? 0 : s.scores[1] > s.scores[0] ? 1 : -1;
+    $('remain').innerHTML = s.frameOver ? '0' : `${rem}`;
+    $('diff').innerHTML = lead < 0 ? 'เสมอ' : `${d} <small>${esc(s.names[lead])} นำ</small>`;
+    $('redsLeft').textContent = s.reds;
+    $('redDots').innerHTML = Array.from({ length: s.mode }, (_, i) => `<i class="${i < s.reds ? '' : 'gone'}"></i>`).join('');
+    $('ballOn').innerHTML = ballOnHTML(s);
+
+    // alerts
+    const al = [];
+    if (s.respotChoose) {
+      al.push(`<div class="note go"><b>สกอร์เสมอ ${s.scores[0]}–${s.scores[1]} · ตั้งลูกดำใหม่ (Re-spotted black)</b><br>เสี่ยงทายว่าใครเลือกแทงก่อน ลูกขาวเริ่มจากเขต D แต้มหรือฟาวล์แรกจบเฟรม<div class="row">${[0, 1].map((p) => `<button class="btn primary" data-act="respotFirst" data-arg="${p}">${esc(s.names[p])} แทงก่อน</button>`).join('')}</div></div>`);
+    } else if (s.respot && !s.frameOver) {
+      al.push(`<div class="note go"><b>ลูกดำตั้งใหม่</b> แต้มหรือฟาวล์แรกจบเฟรม</div>`);
+    }
+    if (s.freeBall && !s.frameOver) {
+      const v = s.phase === 'red' ? 1 : s.clearIdx;
+      al.push(`<div class="note go"><b>ฟรีบอล</b> ${esc(s.names[s.cur])} เลือกลูกใดก็ได้เป็นลูกเป้าหมาย ถ้าลงจะนับเป็น${NAME[v]} ${v} แต้ม${s.phase === 'red' ? ' แล้วได้แทงสีต่อ' : ''}</div>`);
+    }
+    if (!s.frameOver && lead >= 0 && d > rem) {
+      const trail = 1 - lead;
+      const n = Math.ceil((d - rem) / minFoul(s));
+      al.push(`<div class="note warn"><b>${esc(s.names[trail])} ต้องการสนุ๊ก ${n} ครั้ง</b> ตามอยู่ ${d} แต้ม แต่บนโต๊ะเหลือ ${rem} แต้ม</div>`);
+    }
+    if (s.msg) al.push(`<div class="msg" role="status">${esc(s.msg)}</div>`);
+    $('alerts').innerHTML = al.join('');
+
+    // break builder
+    $('brkSum').textContent = brkPts;
+    $('brkChips').innerHTML = s.brk.map((b) => `<span class="chip${DARK_INK[b.v] ? ' dark-ink' : ''}" style="--c:var(--b${b.v})" title="${b.fb ? 'ฟรีบอล ' : ''}${NAME[b.v]}">${b.fb ? 'F' : ''}</span>`).join('')
+      + (brkPts && brkPts >= maxBreak(s) ? '<span class="tag">แม็กซิมัมเบรก!</span>' : '');
+
+    for (let v = 1; v <= 7; v++) $('ball' + v).disabled = !canPot(s, v);
+    const live = !s.frameOver && !s.respotChoose;
+    $('fbBtn').hidden = !(s.freeBall && live);
+    if (s.freeBall) { const v = s.phase === 'red' ? 1 : s.clearIdx; $('fbBtn').textContent = `ฟรีบอลลง +${v}`; }
+    $('sameRedBtn').hidden = !(s.phase === 'colour' && s.lastRed && s.reds > 0 && live);
+    $('endBtn').disabled = !live;
+    $('foulBtn').disabled = !live;
+    $('concedeBtn').disabled = !!s.frameOver;
+
+    // records
+    if (!s.records.length) $('framesTbl').innerHTML = '<p class="empty">ยังไม่มีเฟรมที่จบ ผลจะแสดงที่นี่เมื่อจบแต่ละเฟรม</p>';
+    else $('framesTbl').innerHTML = `<table><thead><tr><th>เฟรม</th><th>${esc(s.names[0])}</th><th>${esc(s.names[1])}</th><th>เบรกสูงสุด</th></tr></thead><tbody>${
+      s.records.map((r) => `<tr><td>${r.frame}</td><td class="${r.winner === 0 ? 'w' : ''}">${r.scores[0]}</td><td class="${r.winner === 1 ? 'w' : ''}">${r.scores[1]}</td><td>${r.high[0] || '–'} / ${r.high[1] || '–'}${r.conceded ? '<span class="tag">ยอมแพ้</span>' : ''}</td></tr>`).join('')
+    }</tbody></table>`;
+
+    const thr = s.mode === 15 ? 20 : 10;
+    $('brkTitle').textContent = `เบรก ${thr}+ ในแมตช์นี้`;
+    const big = s.breaks.filter((b) => b.pts >= thr).sort((a, b) => b.pts - a.pts).slice(0, 10);
+    $('brkList').innerHTML = big.length
+      ? `<ul class="brklist">${big.map((b) => `<li><span>${esc(s.names[b.p])} <span class="msg">· เฟรม ${b.frame}</span></span><span><span class="num">${b.pts}</span>${b.pts >= maxBreak(s) ? '<span class="tag">MAX</span>' : b.pts >= 100 ? '<span class="tag">เซนจูรี</span>' : ''}</span></li>`).join('')}</ul>`
+      : `<p class="empty">ยังไม่มีเบรก ${thr} แต้มขึ้นไป</p>`;
+
+    renderSheet();
+  }
+
+  function renderSheet() {
+    const s = state;
+    const kind = ui.sheet || (s.frameOver ? 'frame' : null);
+    const sheet = $('sheet'), card = $('sheetCard');
+    if (!kind) { sheet.hidden = true; card.innerHTML = ''; return; }
+    sheet.hidden = false;
+    let h = '';
+    if (kind === 'foul') {
+      const f = ui.foul, off = s.cur, opp = 1 - off, mf = minFoul(s), bo = blackOnly(s);
+      const opt = (act, arg, on, label, dis) => `<button class="opt" data-act="${act}" data-arg="${arg}" aria-pressed="${on}"${dis ? ' disabled' : ''}>${label}</button>`;
+      h += `<h3>ฟาวล์โดย ${esc(s.names[off])}</h3><p class="sub">แต้มฟาวล์จะเข้า ${esc(s.names[opp])}${brkNote(s)}</p>`;
+      h += `<div class="grp"><span class="lbl">แต้มฟาวล์ (ขั้นต่ำ ${mf})</span><div class="seg">${[4, 5, 6, 7].map((v) => `<button class="opt num-opt" data-act="foulVal" data-arg="${v}" aria-pressed="${f.val === v}"${v < mf ? ' disabled' : ''}>${v}</button>`).join('')}</div></div>`;
+      if (bo) {
+        h += `<div class="note">เหลือลูกดำลูกเดียว ฟาวล์นี้จบเฟรม ถ้าสกอร์เสมอจะตั้งลูกดำใหม่</div>`;
+      } else {
+        h += `<div class="grp"><span class="lbl">ช็อตต่อไป</span><div class="grp">
+          ${opt('foulNext', 'opp', f.next === 'opp', `${esc(s.names[opp])} แทงต่อ<small>ผู้เล่นฝ่ายตรงข้ามเล่นจากตำแหน่งปัจจุบัน</small>`)}
+          ${opt('foulNext', 'again', f.next === 'again', `ให้ ${esc(s.names[off])} แทงอีกครั้ง<small>ฝ่ายตรงข้ามขอให้ผู้ทำฟาวล์แทงจากตำแหน่งปัจจุบัน</small>`)}
+          ${opt('foulNext', 'replace', f.next === 'replace', `Foul and a Miss · วางลูกคืน<small>ลูกกลับตำแหน่งเดิม ${esc(s.names[off])} แทงใหม่ ลูกเป้าหมายเหมือนเดิม</small>`)}
+        </div></div>`;
+        if (s.phase !== 'clear' && s.reds > 0 && f.next !== 'replace') {
+          h += `<div class="grp"><span class="lbl">แดงที่ลงหลุมในช็อตฟาวล์นี้ (ไม่ตั้งคืน)</span><div class="stepper"><button class="opt num-opt" data-act="foulReds" data-arg="-1" aria-label="ลด">−</button><b>${f.reds}</b><button class="opt num-opt" data-act="foulReds" data-arg="1" aria-label="เพิ่ม">+</button></div></div>`;
+        }
+        if (f.next === 'opp') {
+          h += `<label class="check"><input type="checkbox" id="fbCheck" data-act="foulFb" ${f.fb ? 'checked' : ''}><span>${esc(s.names[opp])} ถูกสนุ๊ก กรรมการขาน <b>ฟรีบอล</b></span></label>`;
+        }
+      }
+      h += `<div class="sheet-foot"><button class="btn" data-act="closeSheet">ยกเลิก</button><button class="btn primary" data-act="foulOk">บันทึกฟาวล์ +${f.val} ให้ ${esc(s.names[opp])}</button></div>`;
+    } else if (kind === 'mode') {
+      const m = ui.pendingMode;
+      h += `<h3>เริ่มแมตช์ใหม่แบบ ${m} แดง?</h3><p class="sub">แมตช์ ${s.mode} แดงที่เล่นอยู่ (เฟรม ${s.frames[0]}–${s.frames[1]}, สกอร์ ${s.scores[0]}–${s.scores[1]}) จะถูกแทนที่ ใช้ชื่อผู้เล่นและจำนวนเฟรมเดิม กดย้อนกลับเพื่อเรียกคืนได้</p>`;
+      h += `<div class="sheet-foot"><button class="btn" data-act="closeSheet">เล่นต่อ ${s.mode} แดง</button><button class="btn primary" data-act="switchModeOk">เริ่ม ${m} แดง · เบรกสูงสุด ${m * 8 + 27}</button></div>`;
+    } else if (kind === 'concede') {
+      h += `<h3>ยอมแพ้เฟรมที่ ${s.frameNo}</h3><p class="sub">ผู้เล่นที่ยอมแพ้จะเสียเฟรมนี้ทันที สกอร์ปัจจุบัน ${s.scores[0]}–${s.scores[1]}</p>`;
+      h += `<div class="grp">${[0, 1].map((p) => `<button class="opt full" data-act="concede" data-arg="${p}">${esc(s.names[p])} ยอมแพ้<small>${esc(s.names[1 - p])} ชนะเฟรมนี้</small></button>`).join('')}</div>`;
+      h += `<div class="sheet-foot"><button class="btn" data-act="closeSheet">ยกเลิก</button></div>`;
+    } else if (kind === 'frame') {
+      const w = s.frameOver.winner;
+      h += `<h3>${esc(s.names[w])} ชนะเฟรมที่ ${s.frameNo}${s.frameOver.conceded ? ' (อีกฝ่ายยอมแพ้)' : ''}</h3>`;
+      h += `<div class="big-result">${s.scores[0]} – ${s.scores[1]}<small>เฟรมรวม ${esc(s.names[0])} ${s.frames[0]} – ${s.frames[1]} ${esc(s.names[1])}</small></div>`;
+      if (s.matchOver) {
+        h += `<div class="note go"><b>${esc(s.names[w])} ชนะแมตช์ ${Math.max(...s.frames)}–${Math.min(...s.frames)}</b></div>`;
+        h += `<div class="sheet-foot"><button class="btn" data-act="undo">↶ ย้อนกลับ</button><button class="btn" data-act="openSetup">ตั้งค่าแมตช์ใหม่</button><button class="btn primary" data-act="rematch">เล่นใหม่ด้วยค่าเดิม</button></div>`;
+      } else {
+        h += `<div class="sheet-foot"><button class="btn" data-act="undo">↶ ย้อนกลับ</button><button class="btn primary" data-act="nextFrame">เริ่มเฟรมที่ ${s.frameNo + 1} · ${esc(s.names[1 - s.breaker])} เบรก</button></div>`;
+      }
+    } else if (kind === 'setup') {
+      ui.setupMode = s.mode;
+      ui.setupFirst = ui.setupFirst ?? 0;
+      h += `<h3>ตั้งค่าแมตช์ใหม่</h3>`;
+      h += `<div class="grp"><span class="lbl">รูปแบบ</span><div class="seg">
+        <button class="opt" data-act="setMode" data-arg="15" aria-pressed="${ui.setupMode === 15}">15 แดง<small>เบรกสูงสุด 147</small></button>
+        <button class="opt" data-act="setMode" data-arg="6" aria-pressed="${ui.setupMode === 6}">6 แดง<small>เบรกสูงสุด 75</small></button></div></div>`;
+      h += `<div class="fields2"><div class="field"><label for="fName0">ผู้เล่น 1</label><input id="fName0" maxlength="24" value="${esc(s.names[0])}"></div><div class="field"><label for="fName1">ผู้เล่น 2</label><input id="fName1" maxlength="24" value="${esc(s.names[1])}"></div></div>`;
+      h += `<div class="fields2"><div class="field"><label for="fBest">จำนวนเฟรม</label><select id="fBest">${[1, 3, 5, 7, 9, 11, 13, 17, 19, 25, 35].map((n) => `<option value="${n}"${n === s.bestOf ? ' selected' : ''}>Best of ${n} (ชนะ ${Math.floor(n / 2) + 1})</option>`).join('')}</select></div>
+        <div class="grp"><span class="lbl">เบรกเฟรมแรก</span><div class="seg"><button class="opt" data-act="setFirst" data-arg="0" aria-pressed="${ui.setupFirst === 0}">ผู้เล่น 1</button><button class="opt" data-act="setFirst" data-arg="1" aria-pressed="${ui.setupFirst === 1}">ผู้เล่น 2</button></div></div></div>`;
+      h += `<p class="msg" style="margin:0">ผู้เบรกจะสลับกันทุกเฟรม แมตช์ปัจจุบันจะถูกแทนที่ กดย้อนกลับเพื่อเรียกคืนได้</p>`;
+      h += `<div class="sheet-foot"><button class="btn" data-act="closeSheet">ยกเลิก</button><button class="btn primary" data-act="setupOk">เริ่มแมตช์</button></div>`;
+    }
+    card.innerHTML = h;
+  }
+  function brkNote(s) { const p = sum(s.brk); return p ? ` · เบรก ${p} ของ ${esc(s.names[s.cur])} จะถูกบันทึกก่อน` : ''; }
+
+  /* ---------- events ---------- */
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-act]');
+    if (!b || b.disabled) return;
+    const fn = A[b.dataset.act];
+    if (fn) fn(b.dataset.arg);
+  });
+  $('sheet').addEventListener('click', (e) => {
+    if (e.target === $('sheet') && ui.sheet) A.closeSheet();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest('input, select, textarea')) {
+      if (e.key === 'Enter' && ui.sheet === 'setup') A.setupOk();
+      return;
+    }
+    if (e.key === 'Escape' && ui.sheet) { A.closeSheet(); return; }
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); A.undo(); return; }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const k = e.key.toLowerCase();
+    if (k === 'z') { A.undo(); return; }
+    if (ui.sheet || state.frameOver) return;
+    if (k >= '1' && k <= '7') A.pot(k);
+    else if (k === 'm') A.endTurn();
+    else if (k === 'f') A.openFoul();
+  });
+
+  /* ---------- boot ---------- */
+  function start(data) {
+    if (data && data.state) { state = data.state; hist = data.hist || []; }
+    else {
+      try {
+        const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+        if (saved && saved.state && saved.state.names) { state = saved.state; hist = saved.hist || []; }
+      } catch (e) {}
+    }
+    if (!state) state = makeMatch({ mode: 15, names: ['ผู้เล่น 1', 'ผู้เล่น 2'], bestOf: 5, first: 0 });
+    render();
+  }
+  start({});
+})();
+</script>
+</body>
+</html>
