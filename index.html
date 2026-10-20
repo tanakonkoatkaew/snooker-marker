@@ -217,6 +217,8 @@ td.w { font-weight: 600; color: var(--baize); }
 .pt[aria-pressed="true"] { border-color: var(--baize); background: var(--baize-soft); box-shadow: 0 0 0 1px var(--baize); }
 .pt:disabled { opacity: .35; cursor: not-allowed; }
 .sw.big { width: 26px; height: 26px; }
+.quad { width: 26px; height: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.quad i { border-radius: 50%; box-shadow: inset 0 0 0 1px var(--ball-ring); }
 .picks { display: grid; gap: 8px; }
 .pick { display: flex; align-items: center; gap: 12px; text-align: left; border: 1.5px solid var(--line); background: var(--surface); border-radius: 14px; padding: 10px 12px; cursor: pointer; }
 .pick .ic { width: 40px; height: 40px; border-radius: 10px; background: var(--surface-2); color: var(--muted); }
@@ -899,7 +901,7 @@ td.w { font-weight: 600; color: var(--baize); }
       const card = (act, arg, on, ic, title, sub) => `<button class="pick" data-act="${act}" data-arg="${arg}" aria-pressed="${on}"><span class="ic">${ICON[ic]}</span><span class="tx"><b>${title}</b><small>${sub}</small></span></button>`;
       const tog = (act, on, ic, label) => `<button class="tog" role="switch" data-act="${act}" aria-checked="${on}" aria-pressed="${on}"><span class="ic">${ICON[ic]}</span>${label}</button>`;
       h += `<div class="foul-head"><span class="ic warn">${ICON.warn}</span><div><h3>ฟาวล์โดย ${esc(s.names[off])}</h3><p class="sub" style="margin:0">${esc(s.names[opp])} ได้แต้ม${brkNote(s)}</p></div></div>`;
-      h += `<div class="grp"><span class="lbl">แต้มฟาวล์</span><div class="pts">${[4, 5, 6, 7].map((v) => `<button class="pt" data-act="foulVal" data-arg="${v}" aria-pressed="${f.val === v}"${v < mf ? ' disabled' : ''}><i class="sw big${DARK_INK[v] ? ' dark-ink' : ''}" style="background:var(--b${v})"></i><b>${v}</b><small>${NAME[v]}</small></button>`).join('')}</div></div>`;
+      h += `<div class="grp"><span class="lbl">แต้มฟาวล์</span><div class="pts">${[4, 5, 6, 7].map((v) => `<button class="pt" data-act="foulVal" data-arg="${v}" aria-pressed="${f.val === v}"${v < mf ? ' disabled' : ''}>${v === 4 ? '<span class="quad">' + [1, 2, 3, 4].map((c) => `<i style="background:var(--b${c})"></i>`).join('') + '</span>' : `<i class="sw big" style="background:var(--b${v})"></i>`}<b>${v}</b><small>${v === 4 ? 'แดง–น้ำตาล' : NAME[v]}</small></button>`).join('')}</div></div>`;
       if (bo) {
         h += `<div class="note">เหลือลูกดำลูกเดียว ฟาวล์นี้จบเฟรม ถ้าสกอร์เสมอจะตั้งลูกดำใหม่</div>`;
       } else {
