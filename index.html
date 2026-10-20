@@ -238,6 +238,19 @@ td.w { font-weight: 600; color: var(--baize); }
 .btn .ic { vertical-align: middle; }
 .btn svg { width: 16px; height: 16px; vertical-align: -3px; }
 
+/* users */
+.userbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.addrow { display: flex; gap: 8px; }
+.addrow input { flex: 1; min-width: 0; font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+.ulist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 40vh; overflow-y: auto; }
+.ulist li { display: flex; align-items: center; gap: 10px; }
+.ulist input { flex: 1; min-width: 0; font: inherit; color: var(--fg); background: transparent; border: 1px solid transparent; border-radius: 10px; padding: 8px 10px; }
+.ulist input:hover { border-color: var(--line); }
+.ulist input:focus { background: var(--bg); border-color: var(--baize); outline: none; }
+.ava { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--baize-soft); color: var(--baize); display: grid; place-items: center; font-family: var(--display); font-weight: 700; }
+.btn.icon { padding: 7px 9px; }
+.btn.icon svg { width: 18px; height: 18px; vertical-align: middle; }
+
 /* sheet */
 .sheet { position: fixed; inset: 0; background: var(--scrim); display: grid; place-items: center; padding: 16px; z-index: 10; overflow-y: auto; }
 .sheet-card { width: min(520px, 100%); background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px;
@@ -441,6 +454,9 @@ td.w { font-weight: 600; color: var(--baize); }
     undo: svg('<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>'),
     cue: svg('<circle cx="12" cy="12" r="8"/><path d="M8 8l8 8M16 8l-8 8"/>'),
     star: svg('<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3z"/>'),
+    users: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>'),
+    plus: svg('<path d="M12 5v14M5 12h14"/>'),
+    trash: svg('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'),
     check: svg('<path d="M5 12.5 10 17.5 19 7"/>'),
   };
 
@@ -509,6 +525,7 @@ td.w { font-weight: 600; color: var(--baize); }
   const prefs = { rate: 50, users: [] };
   try { Object.assign(prefs, JSON.parse(localStorage.getItem(PREF_KEY) || '{}')); } catch (e) {}
   if (!Array.isArray(prefs.users)) prefs.users = [];
+  const MAX_USERS = 30;
   const savePrefs = () => { try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (e) {} };
   // remember player names, most recent first
   function rememberUsers(names) {
@@ -516,7 +533,7 @@ td.w { font-weight: 600; color: var(--baize); }
       if (!n || /^ผู้เล่น [12]$/.test(n)) return;
       prefs.users = [n, ...prefs.users.filter((u) => u.toLowerCase() !== n.toLowerCase())];
     });
-    prefs.users = prefs.users.slice(0, 20);
+    prefs.users = prefs.users.slice(0, MAX_USERS);
     savePrefs();
   }
 
@@ -730,7 +747,7 @@ td.w { font-weight: 600; color: var(--baize); }
       state.msg = `เปลี่ยนเป็นโหมด ${m} แดง · ${state.names[state.first]} เบรกเปิดเฟรมที่ 1`;
       ui.sheet = null; ui.setupMode = m; persist(); render();
     },
-    openSetup() { ui.sheet = 'setup'; render(); setTimeout(() => $('fName0')?.focus(), 0); },
+    openSetup() { ui.draft = null; ui.sheet = 'setup'; render(); setTimeout(() => $('fName0')?.focus(), 0); },
     setMode(m) { ui.setupMode = +m; document.querySelectorAll('[data-act="setMode"]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.arg === +m))); },
     setFirst(p) { ui.setupFirst = +p; document.querySelectorAll('[data-act="setFirst"]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.arg === +p))); },
     pickUser(arg) {
@@ -738,17 +755,28 @@ td.w { font-weight: 600; color: var(--baize); }
       const u = prefs.users[+i];
       if (u != null) { const el = $('fName' + p); el.value = u; el.focus(); }
     },
-    delUser(arg) {
-      const i = +arg;
-      const v = [$('fName0')?.value, $('fName1')?.value], best = $('fBest')?.value, mode = ui.setupMode;
-      prefs.users.splice(i, 1); savePrefs(); render();
-      v.forEach((t, k) => { if (t != null) $('fName' + k).value = t; });
-      $('fBest').value = best; A.setMode(mode);
+    openUsers() {
+      if (ui.sheet === 'setup') ui.draft = { n: [$('fName0').value, $('fName1').value], best: $('fBest').value, mode: ui.setupMode };
+      ui.back = ui.sheet === 'setup'; ui.sheet = 'users'; render();
+      setTimeout(() => $('uNew')?.focus(), 0);
+    },
+    usersDone() { ui.sheet = ui.back ? 'setup' : null; ui.back = false; render(); },
+    addUser() {
+      const el = $('uNew'), n = el.value.trim().slice(0, 24);
+      if (!n) { el.focus(); return; }
+      if (!prefs.users.some((u) => u.toLowerCase() === n.toLowerCase())) { prefs.users = [n, ...prefs.users].slice(0, MAX_USERS); savePrefs(); }
+      render(); $('uNew')?.focus();
+    },
+    delUser(arg) { prefs.users.splice(+arg, 1); savePrefs(); render(); },
+    renameUser(i, name) {
+      const n = (name || '').trim().slice(0, 24);
+      if (n && !prefs.users.some((u, k) => k !== i && u.toLowerCase() === n.toLowerCase())) { prefs.users[i] = n; savePrefs(); }
+      render();
     },
     setupOk() {
       const n0 = $('fName0').value.trim() || 'ผู้เล่น 1';
       const n1 = $('fName1').value.trim() || 'ผู้เล่น 2';
-      rememberUsers([n0, n1]);
+      rememberUsers([n0, n1]); ui.draft = null;
       const cfg = { mode: ui.setupMode, names: [n0, n1], bestOf: +$('fBest').value, first: ui.setupFirst };
       hist.push(JSON.stringify(state));
       state = makeMatch(cfg);
@@ -769,7 +797,7 @@ td.w { font-weight: 600; color: var(--baize); }
       prefs.rate = +r; savePrefs();
       render();
     },
-    closeSheet() { ui.sheet = null; ui.foul = null; render(); },
+    closeSheet() { ui.sheet = null; ui.foul = null; ui.draft = null; ui.back = false; render(); },
     undo() {
       if (!hist.length) return;
       state = JSON.parse(hist.pop());
@@ -936,17 +964,25 @@ td.w { font-weight: 600; color: var(--baize); }
       } else {
         h += `<div class="sheet-foot"><button class="btn" data-act="undo">↶ ย้อนกลับ</button><button class="btn primary" data-act="nextFrame">เริ่มเฟรมที่ ${s.frameNo + 1} · ${esc(s.names[1 - s.breaker])} เบรก</button></div>`;
       }
+    } else if (kind === 'users') {
+      h += `<div class="foul-head"><span class="ic warn" style="background:var(--baize-soft);color:var(--baize)">${ICON.users}</span><div><h3>รายชื่อผู้เล่น</h3><p class="sub" style="margin:0">เพิ่ม แก้ไข หรือลบ ชื่อจะถูกจำไว้ในเครื่องนี้</p></div></div>`;
+      h += `<div class="addrow"><input id="uNew" maxlength="24" placeholder="ชื่อผู้เล่นใหม่" autocomplete="off"><button class="btn primary" data-act="addUser">${ICON.plus} เพิ่ม</button></div>`;
+      h += prefs.users.length
+        ? `<ul class="ulist">${prefs.users.map((u, i) => `<li><span class="ava">${esc([...u][0].toUpperCase())}</span><input value="${esc(u)}" maxlength="24" data-rename="${i}" aria-label="แก้ไขชื่อ ${esc(u)}"><button class="btn danger icon" data-act="delUser" data-arg="${i}" aria-label="ลบ ${esc(u)}" title="ลบ">${ICON.trash}</button></li>`).join('')}</ul><p class="msg" style="margin:0">แก้ชื่อในช่องได้เลย แล้วกด Enter หรือคลิกที่อื่นเพื่อบันทึก</p>`
+        : `<p class="empty">ยังไม่มีผู้เล่น พิมพ์ชื่อด้านบนแล้วกดเพิ่ม</p>`;
+      h += `<div class="sheet-foot"><button class="btn primary" data-act="usersDone">${ICON.check} เสร็จ</button></div>`;
     } else if (kind === 'setup') {
-      ui.setupMode = s.mode;
+      ui.setupMode = ui.draft?.mode ?? s.mode;
       ui.setupFirst = ui.setupFirst ?? 0;
       h += `<h3>ตั้งค่าแมตช์ใหม่</h3>`;
       h += `<div class="grp"><span class="lbl">รูปแบบ</span><div class="seg">
         <button class="opt" data-act="setMode" data-arg="15" aria-pressed="${ui.setupMode === 15}">15 แดง<small>เบรกสูงสุด 147</small></button>
         <button class="opt" data-act="setMode" data-arg="6" aria-pressed="${ui.setupMode === 6}">6 แดง<small>เบรกสูงสุด 75</small></button></div></div>`;
-      const chips = (p) => prefs.users.length ? `<div class="uchips">${prefs.users.map((u, i) => `<span class="uchip"><button type="button" data-act="pickUser" data-arg="${p}:${i}" title="ใช้ชื่อ ${esc(u)}">${esc(u)}</button><button type="button" class="x" data-act="delUser" data-arg="${i}" aria-label="ลบ ${esc(u)}" title="ลบออกจากรายชื่อ">×</button></span>`).join('')}</div>` : '';
-      h += `<div class="fields2"><div class="field"><label for="fName0">ผู้เล่น 1</label><input id="fName0" maxlength="24" value="${esc(s.names[0])}">${chips(0)}</div><div class="field"><label for="fName1">ผู้เล่น 2</label><input id="fName1" maxlength="24" value="${esc(s.names[1])}">${chips(1)}</div></div>`;
-      h += `<p class="msg" style="margin:0">ชื่อที่ใช้จะถูกจำไว้ในเครื่องนี้ กดชื่อเพื่อเลือก กด × เพื่อลบ</p>`;
-      h += `<div class="fields2"><div class="field"><label for="fBest">จำนวนเฟรม</label><select id="fBest">${[1, 3, 5, 7, 9, 11, 13, 17, 19, 25, 35].map((n) => `<option value="${n}"${n === s.bestOf ? ' selected' : ''}>Best of ${n} (ชนะ ${Math.floor(n / 2) + 1})</option>`).join('')}</select></div>
+      const dn = ui.draft?.n || s.names, bestSel = +(ui.draft?.best ?? s.bestOf);
+      const chips = (p) => prefs.users.length ? `<div class="uchips">${prefs.users.map((u, i) => `<span class="uchip"><button type="button" data-act="pickUser" data-arg="${p}:${i}" title="ใช้ชื่อ ${esc(u)}">${esc(u)}</button></span>`).join('')}</div>` : '';
+      h += `<div class="fields2"><div class="field"><label for="fName0">ผู้เล่น 1</label><input id="fName0" maxlength="24" value="${esc(dn[0])}">${chips(0)}</div><div class="field"><label for="fName1">ผู้เล่น 2</label><input id="fName1" maxlength="24" value="${esc(dn[1])}">${chips(1)}</div></div>`;
+      h += `<div class="userbar"><span class="msg">${prefs.users.length ? 'กดชื่อเพื่อเลือก ชื่อที่ใช้จะถูกจำไว้ในเครื่องนี้' : 'ยังไม่มีผู้เล่นที่บันทึกไว้ ชื่อที่ใช้จะถูกจำไว้ให้อัตโนมัติ'}</span><button class="btn" data-act="openUsers">${ICON.users} จัดการรายชื่อ${prefs.users.length ? ` (${prefs.users.length})` : ''}</button></div>`;
+      h += `<div class="fields2"><div class="field"><label for="fBest">จำนวนเฟรม</label><select id="fBest">${[1, 3, 5, 7, 9, 11, 13, 17, 19, 25, 35].map((n) => `<option value="${n}"${n === bestSel ? ' selected' : ''}>Best of ${n} (ชนะ ${Math.floor(n / 2) + 1})</option>`).join('')}</select></div>
         <div class="grp"><span class="lbl">เบรกเฟรมแรก</span><div class="seg"><button class="opt" data-act="setFirst" data-arg="0" aria-pressed="${ui.setupFirst === 0}">ผู้เล่น 1</button><button class="opt" data-act="setFirst" data-arg="1" aria-pressed="${ui.setupFirst === 1}">ผู้เล่น 2</button></div></div></div>`;
       h += `<p class="msg" style="margin:0">ผู้เบรกจะสลับกันทุกเฟรม แมตช์ปัจจุบันจะถูกแทนที่ กดย้อนกลับเพื่อเรียกคืนได้</p>`;
       h += `<div class="sheet-foot"><button class="btn" data-act="closeSheet">ยกเลิก</button><button class="btn primary" data-act="setupOk">เริ่มแมตช์</button></div>`;
@@ -962,12 +998,17 @@ td.w { font-weight: 600; color: var(--baize); }
     const fn = A[b.dataset.act];
     if (fn) fn(b.dataset.arg);
   });
+  $('sheet').addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.dataset && t.dataset.rename != null) A.renameUser(+t.dataset.rename, t.value);
+  });
   $('sheet').addEventListener('click', (e) => {
     if (e.target === $('sheet') && ui.sheet) A.closeSheet();
   });
   document.addEventListener('keydown', (e) => {
     if (e.target.closest('input, select, textarea')) {
       if (e.key === 'Enter' && ui.sheet === 'setup') A.setupOk();
+      else if (e.key === 'Enter' && ui.sheet === 'users') { if (e.target.id === 'uNew') A.addUser(); else e.target.blur(); }
       return;
     }
     if (e.key === 'Escape' && ui.sheet) { A.closeSheet(); return; }
