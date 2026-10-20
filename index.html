@@ -206,6 +206,36 @@ td.w { font-weight: 600; color: var(--baize); }
 .rules summary { cursor: pointer; font-family: var(--display); font-weight: 600; font-size: 15px; }
 .rules ul { margin: 10px 0 4px; padding-left: 20px; display: grid; gap: 6px; max-width: 72ch; }
 
+/* foul sheet */
+.foul-head { display: flex; gap: 12px; align-items: center; }
+.ic { display: inline-grid; place-items: center; flex: none; }
+.ic.warn { width: 44px; height: 44px; border-radius: 12px; background: var(--warn-soft); color: var(--warn); }
+.pts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.pt { border: 1.5px solid var(--line); background: var(--surface); border-radius: 14px; padding: 10px 4px 8px; cursor: pointer; display: grid; justify-items: center; gap: 2px; }
+.pt b { font-family: var(--display); font-size: 24px; line-height: 1; }
+.pt small { font-size: 11px; color: var(--muted); }
+.pt[aria-pressed="true"] { border-color: var(--baize); background: var(--baize-soft); box-shadow: 0 0 0 1px var(--baize); }
+.pt:disabled { opacity: .35; cursor: not-allowed; }
+.sw.big { width: 26px; height: 26px; }
+.picks { display: grid; gap: 8px; }
+.pick { display: flex; align-items: center; gap: 12px; text-align: left; border: 1.5px solid var(--line); background: var(--surface); border-radius: 14px; padding: 10px 12px; cursor: pointer; }
+.pick .ic { width: 40px; height: 40px; border-radius: 10px; background: var(--surface-2); color: var(--muted); }
+.pick .tx { display: grid; line-height: 1.3; }
+.pick .tx small { font-size: 12px; color: var(--muted); }
+.pick[aria-pressed="true"] { border-color: var(--baize); background: var(--baize-soft); box-shadow: 0 0 0 1px var(--baize); }
+.pick[aria-pressed="true"] .ic { background: var(--baize); color: var(--on-baize); }
+.togs { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tog { display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid var(--line); background: var(--surface); border-radius: 99px; padding: 6px 14px 6px 8px; cursor: pointer; font-size: 14px; }
+.tog .ic { width: 26px; height: 26px; border-radius: 50%; background: var(--surface-2); color: var(--muted); }
+.tog .ic svg { width: 16px; height: 16px; }
+.tog[aria-pressed="true"] { border-color: var(--baize); background: var(--baize); color: var(--on-baize); }
+.tog[aria-pressed="true"] .ic { background: transparent; color: inherit; }
+.stepper2 { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; border: 1.5px solid var(--line); border-radius: 99px; padding: 4px 6px 4px 12px; }
+.stepper2 b { font-family: var(--display); min-width: 1.5ch; text-align: center; font-size: 18px; }
+.step { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface-2); cursor: pointer; font-size: 18px; line-height: 1; }
+.btn .ic { vertical-align: middle; }
+.btn svg { width: 16px; height: 16px; vertical-align: -3px; }
+
 /* sheet */
 .sheet { position: fixed; inset: 0; background: var(--scrim); display: grid; place-items: center; padding: 16px; z-index: 10; overflow-y: auto; }
 .sheet-card { width: min(520px, 100%); background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px;
@@ -229,6 +259,12 @@ td.w { font-weight: 600; color: var(--baize); }
 .field { display: grid; gap: 4px; }
 .field label { font-size: 12px; color: var(--muted); }
 .field input, .field select { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; width: 100%; }
+.uchips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.uchip { display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: 99px; overflow: hidden; background: var(--surface); }
+.uchip button { border: 0; background: transparent; cursor: pointer; padding: 3px 8px; font-size: 13px; line-height: 1.4; }
+.uchip button:first-child { padding-left: 10px; max-width: 14ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.uchip button:hover { background: var(--surface-2); }
+.uchip .x { color: var(--muted); }
 .fields2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .big-result { font-family: var(--display); font-size: 40px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
 .big-result small { display: block; font-family: var(--body); font-size: 14px; font-weight: 500; color: var(--muted); }
@@ -375,6 +411,7 @@ td.w { font-weight: 600; color: var(--baize); }
       <li>เมื่อแดงหมด เก็บลูกสีตามลำดับ เหลือง → เขียว → น้ำตาล → น้ำเงิน → ชมพู → ดำ</li>
       <li>ฟาวล์ให้แต้มฝ่ายตรงข้ามขั้นต่ำ 4 แต้ม หรือเท่ากับค่าลูกที่เกี่ยวข้องถ้าสูงกว่า สูงสุด 7 แต้ม แดงที่ลงหลุมจากฟาวล์จะไม่ถูกตั้งคืน</li>
       <li>หลังฟาวล์ ฝ่ายตรงข้ามเลือกแทงเองหรือให้ผู้ทำฟาวล์แทงอีกครั้ง ถ้ากรรมการขาน Foul and a Miss จะขอให้วางลูกคืนตำแหน่งเดิมได้</li>
+      <li>ลูกขาวลงหลุม (in-off) นับเป็นฟาวล์ ผู้แทงต่อวางลูกขาวที่ใดก็ได้ในเขต D</li>
       <li>ฟรีบอล: ถ้าผู้เล่นที่จะแทงต่อถูกสนุ๊กหลังฟาวล์ เลือกลูกใดก็ได้เป็นลูกเป้าหมาย ลูกนั้นมีค่าเท่าลูกเป้าหมายจริง (ถ้าอยู่ช่วงแดงจะนับเป็นแดง 1 แต้ม แล้วได้แทงสีต่อ) ถ้าขอให้ผู้ทำฟาวล์แทงอีกครั้ง ฟรีบอลจะถูกยกเลิก</li>
       <li>เมื่อเหลือลูกดำลูกเดียว แต้มหรือฟาวล์แรกจะจบเฟรม ถ้าสกอร์เสมอ ให้ตั้งลูกดำใหม่ (Re-spotted black) และเสี่ยงทายผู้แทงก่อน</li>
       <li>แต้มที่เหลือบนโต๊ะนับแบบแดงทุกลูกตามด้วยดำ ถ้าฝ่ายที่ตามอยู่ตามมากกว่าแต้มที่เหลือ ต้องได้แต้มจากฟาวล์ของอีกฝ่าย (สนุ๊ก)</li>
@@ -393,6 +430,17 @@ td.w { font-weight: 600; color: var(--baize); }
   const DARK_INK = { 2: true, 6: true };
   const $ = (id) => document.getElementById(id);
   const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const svg = (d) => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  const ICON = {
+    warn: svg('<path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v5M12 17.5v.5"/>'),
+    next: svg('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>'),
+    again: svg('<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>'),
+    undo: svg('<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>'),
+    cue: svg('<circle cx="12" cy="12" r="8"/><path d="M8 8l8 8M16 8l-8 8"/>'),
+    star: svg('<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3z"/>'),
+    check: svg('<path d="M5 12.5 10 17.5 19 7"/>'),
+  };
 
   let state, hist = [];
   const ui = { sheet: null, foul: null };
@@ -456,8 +504,19 @@ td.w { font-weight: 600; color: var(--baize); }
 
   /* ---------- frame analysis ---------- */
   const PREF_KEY = 'snooker-marker-prefs';
-  const prefs = { rate: 50 };
+  const prefs = { rate: 50, users: [] };
   try { Object.assign(prefs, JSON.parse(localStorage.getItem(PREF_KEY) || '{}')); } catch (e) {}
+  if (!Array.isArray(prefs.users)) prefs.users = [];
+  const savePrefs = () => { try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (e) {} };
+  // remember player names, most recent first
+  function rememberUsers(names) {
+    names.forEach((n) => {
+      if (!n || /^ผู้เล่น [12]$/.test(n)) return;
+      prefs.users = [n, ...prefs.users.filter((u) => u.toLowerCase() !== n.toLowerCase())];
+    });
+    prefs.users = prefs.users.slice(0, 20);
+    savePrefs();
+  }
 
   const ballsLeft = (s) => (s.phase === 'clear' ? 8 - s.clearIdx : s.reds + 6);
   function remainingAt(ph, reds, ci) {
@@ -566,6 +625,7 @@ td.w { font-weight: 600; color: var(--baize); }
   function act(fn) {
     hist.push(JSON.stringify(state));
     if (hist.length > 400) hist.shift();
+    state.inOff = false;
     fn(state);
     persist(); render();
   }
@@ -612,12 +672,13 @@ td.w { font-weight: 600; color: var(--baize); }
     },
     openFoul() {
       if (state.frameOver || state.respotChoose) return;
-      ui.foul = { val: minFoul(state), reds: 0, next: 'opp', fb: false };
+      ui.foul = { val: minFoul(state), reds: 0, next: 'opp', fb: false, inOff: false };
       ui.sheet = 'foul'; render();
     },
     foulVal(v) { ui.foul.val = +v; render(); },
     foulReds(d) { const max = state.phase === 'clear' ? 0 : state.reds; ui.foul.reds = Math.min(max, Math.max(0, ui.foul.reds + +d)); render(); },
-    foulNext(x) { ui.foul.next = x; if (x !== 'opp') ui.foul.fb = false; if (x === 'replace') ui.foul.reds = 0; render(); },
+    foulNext(x) { ui.foul.next = x; if (x !== 'opp') ui.foul.fb = false; if (x === 'replace') { ui.foul.reds = 0; ui.foul.inOff = false; } render(); },
+    foulInOff() { ui.foul.inOff = !ui.foul.inOff; render(); },
     foulFb() { ui.foul.fb = !ui.foul.fb; render(); },
     foulOk() {
       const f = ui.foul; ui.sheet = null; ui.foul = null;
@@ -626,6 +687,7 @@ td.w { font-weight: 600; color: var(--baize); }
         commitBreak(s);
         s.scores[opp] += f.val; s.lastRed = false; s.freeBall = false;
         s.msg = `ฟาวล์โดย ${s.names[off]} · ${s.names[opp]} ได้ ${f.val} แต้ม`;
+        if (f.inOff) s.msg += ' · ลูกขาวลงหลุม';
         if (blackOnly(s)) { blackFinished(s); return; }
         if (f.next === 'replace') { s.cur = off; s.msg += ' · วางลูกคืน แทงใหม่'; return; }
         if (s.phase !== 'clear') {
@@ -636,6 +698,7 @@ td.w { font-weight: 600; color: var(--baize); }
         s.freeBall = f.next === 'opp' && f.fb && !blackOnly(s);
         if (f.next === 'again') s.msg += ` · ให้ ${s.names[off]} แทงอีกครั้ง`;
         if (s.freeBall) s.msg += ' · ฟรีบอล';
+        if (f.inOff) { s.inOff = true; s.msg += ` · ${s.names[s.cur]} วางลูกขาวในเขต D`; }
       });
     },
     openConcede() { if (state.frameOver) return; ui.sheet = 'concede'; render(); },
@@ -668,9 +731,22 @@ td.w { font-weight: 600; color: var(--baize); }
     openSetup() { ui.sheet = 'setup'; render(); setTimeout(() => $('fName0')?.focus(), 0); },
     setMode(m) { ui.setupMode = +m; document.querySelectorAll('[data-act="setMode"]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.arg === +m))); },
     setFirst(p) { ui.setupFirst = +p; document.querySelectorAll('[data-act="setFirst"]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.arg === +p))); },
+    pickUser(arg) {
+      const [p, i] = arg.split(':');
+      const u = prefs.users[+i];
+      if (u != null) { const el = $('fName' + p); el.value = u; el.focus(); }
+    },
+    delUser(arg) {
+      const i = +arg;
+      const v = [$('fName0')?.value, $('fName1')?.value], best = $('fBest')?.value, mode = ui.setupMode;
+      prefs.users.splice(i, 1); savePrefs(); render();
+      v.forEach((t, k) => { if (t != null) $('fName' + k).value = t; });
+      $('fBest').value = best; A.setMode(mode);
+    },
     setupOk() {
       const n0 = $('fName0').value.trim() || 'ผู้เล่น 1';
       const n1 = $('fName1').value.trim() || 'ผู้เล่น 2';
+      rememberUsers([n0, n1]);
       const cfg = { mode: ui.setupMode, names: [n0, n1], bestOf: +$('fBest').value, first: ui.setupFirst };
       hist.push(JSON.stringify(state));
       state = makeMatch(cfg);
@@ -688,8 +764,7 @@ td.w { font-weight: 600; color: var(--baize); }
       act((s) => { commitBreak(s); frameEnd(s, a.L, true); s.msg = `${s.names[a.T]} ยอมแพ้เฟรมที่ ${s.frameNo}`; });
     },
     setRate(r) {
-      prefs.rate = +r;
-      try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (e) {}
+      prefs.rate = +r; savePrefs();
       render();
     },
     closeSheet() { ui.sheet = null; ui.foul = null; render(); },
@@ -752,6 +827,9 @@ td.w { font-weight: 600; color: var(--baize); }
       al.push(`<div class="note go"><b>สกอร์เสมอ ${s.scores[0]}–${s.scores[1]} · ตั้งลูกดำใหม่ (Re-spotted black)</b><br>เสี่ยงทายว่าใครเลือกแทงก่อน ลูกขาวเริ่มจากเขต D แต้มหรือฟาวล์แรกจบเฟรม<div class="row">${[0, 1].map((p) => `<button class="btn primary" data-act="respotFirst" data-arg="${p}">${esc(s.names[p])} แทงก่อน</button>`).join('')}</div></div>`);
     } else if (s.respot && !s.frameOver) {
       al.push(`<div class="note go"><b>ลูกดำตั้งใหม่</b> แต้มหรือฟาวล์แรกจบเฟรม</div>`);
+    }
+    if (s.inOff && !s.frameOver && !s.respotChoose) {
+      al.push(`<div class="note go"><b>ลูกขาวลงหลุม</b> ${esc(s.names[s.cur])} วางลูกขาวที่ใดก็ได้ในเขต D (ยิงออกนอกเขต D ได้)</div>`);
     }
     if (s.freeBall && !s.frameOver) {
       const v = s.phase === 'red' ? 1 : s.clearIdx;
@@ -818,25 +896,26 @@ td.w { font-weight: 600; color: var(--baize); }
       </div>`;
     } else if (kind === 'foul') {
       const f = ui.foul, off = s.cur, opp = 1 - off, mf = minFoul(s), bo = blackOnly(s);
-      const opt = (act, arg, on, label, dis) => `<button class="opt" data-act="${act}" data-arg="${arg}" aria-pressed="${on}"${dis ? ' disabled' : ''}>${label}</button>`;
-      h += `<h3>ฟาวล์โดย ${esc(s.names[off])}</h3><p class="sub">แต้มฟาวล์จะเข้า ${esc(s.names[opp])}${brkNote(s)}</p>`;
-      h += `<div class="grp"><span class="lbl">แต้มฟาวล์ (ขั้นต่ำ ${mf})</span><div class="seg">${[4, 5, 6, 7].map((v) => `<button class="opt num-opt" data-act="foulVal" data-arg="${v}" aria-pressed="${f.val === v}"${v < mf ? ' disabled' : ''}>${v}</button>`).join('')}</div></div>`;
+      const card = (act, arg, on, ic, title, sub) => `<button class="pick" data-act="${act}" data-arg="${arg}" aria-pressed="${on}"><span class="ic">${ICON[ic]}</span><span class="tx"><b>${title}</b><small>${sub}</small></span></button>`;
+      const tog = (act, on, ic, label) => `<button class="tog" role="switch" data-act="${act}" aria-checked="${on}" aria-pressed="${on}"><span class="ic">${ICON[ic]}</span>${label}</button>`;
+      h += `<div class="foul-head"><span class="ic warn">${ICON.warn}</span><div><h3>ฟาวล์โดย ${esc(s.names[off])}</h3><p class="sub" style="margin:0">${esc(s.names[opp])} ได้แต้ม${brkNote(s)}</p></div></div>`;
+      h += `<div class="grp"><span class="lbl">แต้มฟาวล์</span><div class="pts">${[4, 5, 6, 7].map((v) => `<button class="pt" data-act="foulVal" data-arg="${v}" aria-pressed="${f.val === v}"${v < mf ? ' disabled' : ''}><i class="sw big${DARK_INK[v] ? ' dark-ink' : ''}" style="background:var(--b${v})"></i><b>${v}</b><small>${NAME[v]}</small></button>`).join('')}</div></div>`;
       if (bo) {
         h += `<div class="note">เหลือลูกดำลูกเดียว ฟาวล์นี้จบเฟรม ถ้าสกอร์เสมอจะตั้งลูกดำใหม่</div>`;
       } else {
-        h += `<div class="grp"><span class="lbl">ช็อตต่อไป</span><div class="grp">
-          ${opt('foulNext', 'opp', f.next === 'opp', `${esc(s.names[opp])} แทงต่อ<small>ผู้เล่นฝ่ายตรงข้ามเล่นจากตำแหน่งปัจจุบัน</small>`)}
-          ${opt('foulNext', 'again', f.next === 'again', `ให้ ${esc(s.names[off])} แทงอีกครั้ง<small>ฝ่ายตรงข้ามขอให้ผู้ทำฟาวล์แทงจากตำแหน่งปัจจุบัน</small>`)}
-          ${opt('foulNext', 'replace', f.next === 'replace', `Foul and a Miss · วางลูกคืน<small>ลูกกลับตำแหน่งเดิม ${esc(s.names[off])} แทงใหม่ ลูกเป้าหมายเหมือนเดิม</small>`)}
+        h += `<div class="grp"><span class="lbl">ช็อตต่อไป</span><div class="picks">
+          ${card('foulNext', 'opp', f.next === 'opp', 'next', `${esc(s.names[opp])} แทงต่อ`, 'เล่นจากตำแหน่งปัจจุบัน')}
+          ${card('foulNext', 'again', f.next === 'again', 'again', `${esc(s.names[off])} แทงอีกครั้ง`, 'ฝ่ายตรงข้ามขอให้แทงใหม่')}
+          ${card('foulNext', 'replace', f.next === 'replace', 'undo', 'Foul and a Miss', 'วางลูกคืนที่เดิม แล้วแทงใหม่')}
         </div></div>`;
-        if (s.phase !== 'clear' && s.reds > 0 && f.next !== 'replace') {
-          h += `<div class="grp"><span class="lbl">แดงที่ลงหลุมในช็อตฟาวล์นี้ (ไม่ตั้งคืน)</span><div class="stepper"><button class="opt num-opt" data-act="foulReds" data-arg="-1" aria-label="ลด">−</button><b>${f.reds}</b><button class="opt num-opt" data-act="foulReds" data-arg="1" aria-label="เพิ่ม">+</button></div></div>`;
-        }
-        if (f.next === 'opp') {
-          h += `<label class="check"><input type="checkbox" id="fbCheck" data-act="foulFb" ${f.fb ? 'checked' : ''}><span>${esc(s.names[opp])} ถูกสนุ๊ก กรรมการขาน <b>ฟรีบอล</b></span></label>`;
-        }
+        const showReds = s.phase !== 'clear' && s.reds > 0 && f.next !== 'replace';
+        h += `<div class="grp"><span class="lbl">เหตุการณ์ในช็อตนี้</span><div class="togs">`;
+        if (f.next !== 'replace') h += tog('foulInOff', f.inOff, 'cue', 'ลูกขาวลงหลุม');
+        if (f.next === 'opp') h += tog('foulFb', f.fb, 'star', `ฟรีบอล (${esc(s.names[opp])} ถูกสนุ๊ก)`);
+        if (showReds) h += `<span class="stepper2"><i class="sw" style="background:var(--b1)"></i>แดงลงหลุม<button class="step" data-act="foulReds" data-arg="-1" aria-label="ลด">−</button><b>${f.reds}</b><button class="step" data-act="foulReds" data-arg="1" aria-label="เพิ่ม">+</button></span>`;
+        h += `</div></div>`;
       }
-      h += `<div class="sheet-foot"><button class="btn" data-act="closeSheet">ยกเลิก</button><button class="btn primary" data-act="foulOk">บันทึกฟาวล์ +${f.val} ให้ ${esc(s.names[opp])}</button></div>`;
+      h += `<div class="sheet-foot"><button class="btn" data-act="closeSheet">ยกเลิก</button><button class="btn primary" data-act="foulOk">${ICON.check} บันทึก +${f.val} ให้ ${esc(s.names[opp])}</button></div>`;
     } else if (kind === 'mode') {
       const m = ui.pendingMode;
       h += `<h3>เริ่มแมตช์ใหม่แบบ ${m} แดง?</h3><p class="sub">แมตช์ ${s.mode} แดงที่เล่นอยู่ (เฟรม ${s.frames[0]}–${s.frames[1]}, สกอร์ ${s.scores[0]}–${s.scores[1]}) จะถูกแทนที่ ใช้ชื่อผู้เล่นและจำนวนเฟรมเดิม กดย้อนกลับเพื่อเรียกคืนได้</p>`;
@@ -862,7 +941,9 @@ td.w { font-weight: 600; color: var(--baize); }
       h += `<div class="grp"><span class="lbl">รูปแบบ</span><div class="seg">
         <button class="opt" data-act="setMode" data-arg="15" aria-pressed="${ui.setupMode === 15}">15 แดง<small>เบรกสูงสุด 147</small></button>
         <button class="opt" data-act="setMode" data-arg="6" aria-pressed="${ui.setupMode === 6}">6 แดง<small>เบรกสูงสุด 75</small></button></div></div>`;
-      h += `<div class="fields2"><div class="field"><label for="fName0">ผู้เล่น 1</label><input id="fName0" maxlength="24" value="${esc(s.names[0])}"></div><div class="field"><label for="fName1">ผู้เล่น 2</label><input id="fName1" maxlength="24" value="${esc(s.names[1])}"></div></div>`;
+      const chips = (p) => prefs.users.length ? `<div class="uchips">${prefs.users.map((u, i) => `<span class="uchip"><button type="button" data-act="pickUser" data-arg="${p}:${i}" title="ใช้ชื่อ ${esc(u)}">${esc(u)}</button><button type="button" class="x" data-act="delUser" data-arg="${i}" aria-label="ลบ ${esc(u)}" title="ลบออกจากรายชื่อ">×</button></span>`).join('')}</div>` : '';
+      h += `<div class="fields2"><div class="field"><label for="fName0">ผู้เล่น 1</label><input id="fName0" maxlength="24" value="${esc(s.names[0])}">${chips(0)}</div><div class="field"><label for="fName1">ผู้เล่น 2</label><input id="fName1" maxlength="24" value="${esc(s.names[1])}">${chips(1)}</div></div>`;
+      h += `<p class="msg" style="margin:0">ชื่อที่ใช้จะถูกจำไว้ในเครื่องนี้ กดชื่อเพื่อเลือก กด × เพื่อลบ</p>`;
       h += `<div class="fields2"><div class="field"><label for="fBest">จำนวนเฟรม</label><select id="fBest">${[1, 3, 5, 7, 9, 11, 13, 17, 19, 25, 35].map((n) => `<option value="${n}"${n === s.bestOf ? ' selected' : ''}>Best of ${n} (ชนะ ${Math.floor(n / 2) + 1})</option>`).join('')}</select></div>
         <div class="grp"><span class="lbl">เบรกเฟรมแรก</span><div class="seg"><button class="opt" data-act="setFirst" data-arg="0" aria-pressed="${ui.setupFirst === 0}">ผู้เล่น 1</button><button class="opt" data-act="setFirst" data-arg="1" aria-pressed="${ui.setupFirst === 1}">ผู้เล่น 2</button></div></div></div>`;
       h += `<p class="msg" style="margin:0">ผู้เบรกจะสลับกันทุกเฟรม แมตช์ปัจจุบันจะถูกแทนที่ กดย้อนกลับเพื่อเรียกคืนได้</p>`;
